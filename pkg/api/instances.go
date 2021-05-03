@@ -103,6 +103,9 @@ func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter
 			Count:     len(results),
 			Total:     total,
 		}
+		if results == nil {
+			r.Instances = []model.Instance{}
+		}
 		err = json.NewEncoder(writer).Encode(r)
 		if err != nil {
 			log.Println("ERROR: unable to encode response", err)
