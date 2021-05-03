@@ -1,0 +1,22 @@
+{
+    "api_port": "8080",
+    "kafka_bootstrap": "127.0.01",
+    "mqtt_user": "keycloak-client",
+    "mqtt_pw": "keycloak-secret",
+    "mqtt_broker": "localhost:1883",
+    "mongo_url": "mongodb://localhost:27017",
+    "mongo_table": "kafka2mqtt",
+    "mongo_import_type_collection": "instances",
+    "mongo_repl_set": true,
+    "transfer_image": "ghcr.io/senergy-platform/kafka2mqtt:prod",
+    "deploy_mode": "docker",
+    "docker_network": "bridge",
+    "docker_pull": true,
+    "rancher_url": "http://rancher/v2-beta/projects/___/",
+    "rancher_access_key": "",
+    "rancher_secret_key": "",
+    "rancher_stack_id": "",
+    "rancher_namespace_id": "",
+    "rancher_project_id": "",
+    "debug": true
+}
