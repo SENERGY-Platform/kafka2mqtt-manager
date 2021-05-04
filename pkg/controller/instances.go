@@ -27,13 +27,13 @@ import (
 )
 
 const idPrefix = "urn:infai:ses:kafka2mqtt-instance:"
-const containerNamePrefix = "kafka2mqtt-"
+const containerNamePrefix = "k2m-"
 
 func (this *Controller) ListInstances(userId string, limit int64, offset int64, sort string, asc bool, search string, includeGenerated bool) (results []model.Instance, total int64, err error, errCode int) {
 	ctx, _ := getTimeoutContext()
 	results, total, err = this.db.ListInstances(ctx, limit, offset, sort, userId, asc, search, includeGenerated)
 	if err != nil {
-		return results,0, err, http.StatusInternalServerError
+		return results, 0, err, http.StatusInternalServerError
 	}
 	return results, total, nil, http.StatusOK
 }
@@ -157,7 +157,7 @@ func (this *Controller) getEnv(instance model.Instance) (m map[string]string, er
 		if len(parts) != 2 {
 			return m, errors.New("filterType is operatorId, but filter has not exactly two parts")
 		}
-		m["FILTER_QUERY"] += "pipeline_id==\"" + parts[0]  + "\"and.operator_id==\"" + parts[1] + "\""
+		m["FILTER_QUERY"] += "pipeline_id==\"" + parts[0] + "\"and.operator_id==\"" + parts[1] + "\""
 	case "import_id":
 		m["FILTER_QUERY"] += "import_id==\"" + instance.Filter + "\""
 	default:
@@ -170,8 +170,8 @@ func (this *Controller) getEnv(instance model.Instance) (m map[string]string, er
 	m["MQTT_QOS"] = "1"
 	m["MQTT_TOPIC_MAPPING"] = "["
 	for i := range instance.Values {
-		m["MQTT_TOPIC_MAPPING"] += "{\"query\":\"."+instance.Values[i].Path+"\",\"topic\":\"export/"+instance.UserId+"/"+instance.Id+"/"+instance.Values[i].Path+"\"}"
-		if i < len(instance.Values) - 1 {
+		m["MQTT_TOPIC_MAPPING"] += "{\"query\":\"." + instance.Values[i].Path + "\",\"topic\":\"export/" + instance.UserId + "/" + instance.Id + "/" + instance.Values[i].Path + "\"}"
+		if i < len(instance.Values)-1 {
 			m["MQTT_TOPIC_MAPPING"] += ","
 		}
 	}
