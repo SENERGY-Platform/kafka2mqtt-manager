@@ -60,7 +60,6 @@ func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter
 			return
 		}
 		return
-		return
 	})
 
 	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -86,8 +85,8 @@ func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter
 		if sort == "" {
 			sort = "name"
 		}
-		orderBy := strings.Split(sort, ".")[0]
-		asc := !strings.HasSuffix(sort, ".desc")
+		orderBy := strings.Split(sort, ":")[0]
+		asc := !strings.HasSuffix(sort, ":desc")
 
 		search := request.URL.Query().Get("search")
 
