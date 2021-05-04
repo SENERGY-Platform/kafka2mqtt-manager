@@ -26,7 +26,7 @@ import (
 	"time"
 )
 
-const idPrefix = "urn:infai:ses:kafka2mqtt-instance:"
+const idPrefix = "urn:infai:ses:broker-export:"
 const containerNamePrefix = "k2m-"
 
 func (this *Controller) ListInstances(userId string, limit int64, offset int64, sort string, asc bool, search string, includeGenerated bool) (results []model.Instance, total int64, err error, errCode int) {
