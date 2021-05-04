@@ -81,7 +81,7 @@ func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		sort := request.URL.Query().Get("sort")
+		sort := request.URL.Query().Get("order")
 		if sort == "" {
 			sort = "name"
 		}
