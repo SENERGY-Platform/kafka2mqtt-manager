@@ -34,8 +34,8 @@ type Instance struct {
 	UserId      string    `json:"-"`
 	ServiceId   string    `json:"-"`
 	Id          string    `json:"ID"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	CreatedAt   time.Time `json:"CreatedAt"`
+	UpdatedAt   time.Time `json:"UpdatedAt"`
 }
 
 type InstancesResponse struct {
