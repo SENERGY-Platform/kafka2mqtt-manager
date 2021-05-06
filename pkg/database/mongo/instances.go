@@ -26,10 +26,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
 	"log"
+	"strings"
 )
 
 const idFieldName = "Id"
 const nameFieldName = "Name"
+const descriptionFieldName = "Description"
+const entityNameFieldName = "EntityName"
+const serviceNameFieldName = "ServiceName"
 const userIdFieldName = "UserId"
 const createdAtFieldName = "CreatedAt"
 const updatedAtFieldName = "UpdatedAt"
@@ -37,6 +41,9 @@ const generatedFieldName = "Generated"
 
 var idKey string
 var nameKey string
+var descriptionKey string
+var entityNameKey string
+var serviceNameKey string
 var ownerKey string
 var createdAtKey string
 var updatedAtKey string
@@ -49,6 +56,18 @@ func init() {
 		log.Fatal(err)
 	}
 	nameKey, err = getBsonFieldName(model.Instance{}, nameFieldName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	descriptionKey, err = getBsonFieldName(model.Instance{}, descriptionFieldName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	entityNameKey, err = getBsonFieldName(model.Instance{}, entityNameFieldName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	serviceNameKey, err = getBsonFieldName(model.Instance{}, serviceNameFieldName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -122,15 +141,33 @@ func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64,
 		direction = int32(-1)
 	}
 	opt.SetSort(bsonx.Doc{{sortby, bsonx.Int32(direction)}})
+
+	searchKey := nameKey
+	searchSplit := strings.Split(search, ":")
+	if len(searchSplit) > 1 {
+		switch searchSplit[0] {
+		case "id":
+			searchKey = idKey
+		case "name":
+			searchKey = nameKey
+		case "entity_name":
+			searchKey = entityNameKey
+		case "description":
+			searchKey = descriptionKey
+		case "service_name":
+			searchKey = serviceNameKey
+		}
+		search = searchSplit[1]
+	}
 	var filter bson.M
 	if includeGenerated {
-		filter = bson.M{ownerKey: owner, nameKey: primitive.Regex{
+		filter = bson.M{ownerKey: owner, searchKey: primitive.Regex{
 			Pattern: ".*" + search + ".*",
 		}}
 	} else {
 		// filter for generatedKey == False || generatedKey == undefined to find legacy instances
 		filter = bson.M{ownerKey: owner, "$or": []bson.M{{generatedKey: false}, {generatedKey: bson.M{"$exists": false}}},
-			nameKey: primitive.Regex{
+			searchKey: primitive.Regex{
 				Pattern: ".*" + search + ".*",
 			}}
 	}
@@ -181,5 +218,3 @@ func (this *Mongo) GetInstances(ctx context.Context, ids []string, owner string)
 
 	return result, len(result) == len(ids), nil
 }
-
-
