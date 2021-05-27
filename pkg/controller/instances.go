@@ -175,7 +175,7 @@ func (this *Controller) getEnv(instance *model.Instance) (m map[string]string, e
 		}
 		if instance.CustomMqttBaseTopic != nil {
 			baseTopic = *instance.CustomMqttBaseTopic
-			if !strings.HasSuffix(baseTopic, "/") {
+			if !strings.HasSuffix(baseTopic, "/") && len(baseTopic) > 0 {
 				baseTopic += "/"
 				instance.CustomMqttBaseTopic = &baseTopic
 				log.Println("baseTopic", baseTopic, *instance.CustomMqttBaseTopic)
