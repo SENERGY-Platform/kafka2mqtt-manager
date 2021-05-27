@@ -20,6 +20,7 @@ import (
 	"errors"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
 	"github.com/hashicorp/go-uuid"
+	"log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -61,7 +62,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string) (
 	instance.Id = idPrefix + id
 	instance.UserId = userId
 
-	env, err := this.getEnv(instance)
+	env, err := this.getEnv(&instance)
 	if err != nil {
 		return result, err, http.StatusBadRequest
 	}
@@ -93,7 +94,7 @@ func (this *Controller) SetInstance(instance model.Instance, userId string) (err
 	}
 	instance.UserId = userId
 
-	env, err := this.getEnv(instance)
+	env, err := this.getEnv(&instance)
 	if err != nil {
 		return err, http.StatusBadRequest
 	}
@@ -142,7 +143,7 @@ func (this *Controller) DeleteInstances(ids []string, userId string) (err error,
 	return nil, http.StatusNoContent
 }
 
-func (this *Controller) getEnv(instance model.Instance) (m map[string]string, err error) {
+func (this *Controller) getEnv(instance *model.Instance) (m map[string]string, err error) {
 	m = map[string]string{}
 	m["KAFKA_BOOTSTRAP"] = this.config.KafkaBootstrap
 	m["KAFKA_TOPIC"] = instance.Topic
@@ -163,14 +164,36 @@ func (this *Controller) getEnv(instance model.Instance) (m map[string]string, er
 	default:
 		return m, errors.New("unknown filterType")
 	}
-	m["MQTT_USER"] = this.config.MqttUser
-	m["MQTT_PW"] = this.config.MqttPw
+	baseTopic := "export/" + instance.UserId + "/" + instance.Id + "/"
+	if instance.CustomMqttBroker != nil {
+		m["MQTT_BROKER"] = *instance.CustomMqttBroker
+		if instance.CustomMqttUser != nil {
+			m["MQTT_USER"] = *instance.CustomMqttUser
+		}
+		if instance.CustomMqttPassword != nil {
+			m["MQTT_PW"] = *instance.CustomMqttPassword
+		}
+		if instance.CustomMqttBaseTopic != nil {
+			baseTopic = *instance.CustomMqttBaseTopic
+			if !strings.HasSuffix(baseTopic, "/") {
+				baseTopic += "/"
+				instance.CustomMqttBaseTopic = &baseTopic
+				log.Println("baseTopic", baseTopic, *instance.CustomMqttBaseTopic)
+			}
+		}
+	} else {
+		if instance.CustomMqttUser != nil || instance.CustomMqttPassword != nil || instance.CustomMqttBaseTopic != nil {
+			return nil, errors.New("must not set custom mqtt options with default broker")
+		}
+		m["MQTT_BROKER"] = this.config.MqttBroker
+		m["MQTT_USER"] = this.config.MqttUser
+		m["MQTT_PW"] = this.config.MqttPw
+	}
 	m["MQTT_CLIENT_ID"] = instance.Id
-	m["MQTT_BROKER"] = this.config.MqttBroker
 	m["MQTT_QOS"] = "1"
 	m["MQTT_TOPIC_MAPPING"] = "["
 	for i := range instance.Values {
-		m["MQTT_TOPIC_MAPPING"] += "{\"query\":\"." + instance.Values[i].Path + "\",\"topic\":\"export/" + instance.UserId + "/" + instance.Id + "/" + instance.Values[i].Name + "\"}"
+		m["MQTT_TOPIC_MAPPING"] += "{\"query\":\"." + instance.Values[i].Path + "\",\"topic\":" + baseTopic + instance.Values[i].Name + "\"}"
 		if i < len(instance.Values)-1 {
 			m["MQTT_TOPIC_MAPPING"] += ","
 		}
