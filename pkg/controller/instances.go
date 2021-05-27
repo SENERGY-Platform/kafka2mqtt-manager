@@ -193,7 +193,7 @@ func (this *Controller) getEnv(instance *model.Instance) (m map[string]string, e
 	m["MQTT_QOS"] = "1"
 	m["MQTT_TOPIC_MAPPING"] = "["
 	for i := range instance.Values {
-		m["MQTT_TOPIC_MAPPING"] += "{\"query\":\"." + instance.Values[i].Path + "\",\"topic\":" + baseTopic + instance.Values[i].Name + "\"}"
+		m["MQTT_TOPIC_MAPPING"] += "{\"query\":\"." + instance.Values[i].Path + "\",\"topic\":\"" + baseTopic + instance.Values[i].Name + "\"}"
 		if i < len(instance.Values)-1 {
 			m["MQTT_TOPIC_MAPPING"] += ","
 		}
