@@ -18,5 +18,9 @@
     "rancher_stack_id": "",
     "rancher_namespace_id": "",
     "rancher_project_id": "",
-    "debug": true
+    "debug": true,
+    "verify_input": true,
+    "permission_search_url": "http://perm_search:8080",
+    "import_deploy_url": "http://import-deploy:8080",
+    "analytics_pipeline_url": "http://analytics-pipeline:8000"
 }

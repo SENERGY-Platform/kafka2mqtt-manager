@@ -48,6 +48,10 @@ type Config struct {
 	RancherStackId            string `json:"rancher_stack_id"`
 	RancherNamespaceId        string `json:"rancher_namespace_id"`
 	RancherProjectId          string `json:"rancher_project_id"`
+	VerifyInput               bool   `json:"verify_input"`
+	PermissionSearchUrl       string `json:"permission_search_url"`
+	ImportDeployUrl           string `json:"import_deploy_url"`
+	AnalyticsPipelineUrl      string `json:"analytics_pipeline_url"`
 
 	Debug bool `json:"debug"`
 }

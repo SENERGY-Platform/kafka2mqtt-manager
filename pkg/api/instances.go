@@ -37,6 +37,8 @@ type instanceList struct {
 	Total     int64           `json:"total"`
 }
 
+const authHeader = "Authorization"
+
 func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter.Router) {
 	resource := "/instances"
 
@@ -47,7 +49,7 @@ func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		result, err, code := control.CreateInstance(instance, getUserId(request))
+		result, err, code := control.CreateInstance(instance, getUserId(request), request.Header.Get(authHeader))
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return
@@ -167,7 +169,7 @@ func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter
 			http.Error(writer, "IDs don't match", http.StatusBadRequest)
 			return
 		}
-		err, code := control.SetInstance(instance, getUserId(request))
+		err, code := control.SetInstance(instance, getUserId(request), request.Header.Get(authHeader))
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 			return

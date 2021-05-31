@@ -19,6 +19,7 @@ package controller
 import (
 	"errors"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/verification"
 	"github.com/hashicorp/go-uuid"
 	"log"
 	"net/http"
@@ -29,6 +30,9 @@ import (
 
 const idPrefix = "urn:infai:ses:broker-export:"
 const containerNamePrefix = "k2m-"
+const filterDevice = "deviceId"
+const filterImport = "import_id"
+const filterOperator = "operatorId"
 
 func (this *Controller) ListInstances(userId string, limit int64, offset int64, sort string, asc bool, search string, includeGenerated bool) (results []model.Instance, total int64, err error, errCode int) {
 	ctx, _ := getTimeoutContext()
@@ -51,7 +55,7 @@ func (this *Controller) ReadInstance(id string, userId string) (result model.Ins
 	return result, nil, http.StatusOK
 }
 
-func (this *Controller) CreateInstance(instance model.Instance, userId string) (result model.Instance, err error, code int) {
+func (this *Controller) CreateInstance(instance model.Instance, userId string, token string) (result model.Instance, err error, code int) {
 	if instance.Id != "" {
 		return result, errors.New("explicit setting of id not allowed"), http.StatusBadRequest
 	}
@@ -62,9 +66,9 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string) (
 	instance.Id = idPrefix + id
 	instance.UserId = userId
 
-	env, err := this.getEnv(&instance)
+	env, err, code := this.getEnv(&instance, token, userId)
 	if err != nil {
-		return result, err, http.StatusBadRequest
+		return result, err, code
 	}
 
 	instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, env, true)
@@ -83,7 +87,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string) (
 	return instance, nil, http.StatusOK
 }
 
-func (this *Controller) SetInstance(instance model.Instance, userId string) (err error, code int) {
+func (this *Controller) SetInstance(instance model.Instance, userId string, token string) (err error, code int) {
 	ctx, _ := getTimeoutContext()
 	existing, exists, err := this.db.GetInstance(ctx, instance.Id, userId)
 	if !exists {
@@ -94,9 +98,9 @@ func (this *Controller) SetInstance(instance model.Instance, userId string) (err
 	}
 	instance.UserId = userId
 
-	env, err := this.getEnv(&instance)
+	env, err, code := this.getEnv(&instance, token, userId)
 	if err != nil {
-		return err, http.StatusBadRequest
+		return err, code
 	}
 
 	if (existing.Offset != instance.Offset) || (existing.Offset == "smallest" && !reflect.DeepEqual(existing.Values, instance.Values)) {
@@ -143,7 +147,7 @@ func (this *Controller) DeleteInstances(ids []string, userId string) (err error,
 	return nil, http.StatusNoContent
 }
 
-func (this *Controller) getEnv(instance *model.Instance) (m map[string]string, err error) {
+func (this *Controller) getEnv(instance *model.Instance, token string, userId string) (m map[string]string, err error, code int) {
 	m = map[string]string{}
 	m["KAFKA_BOOTSTRAP"] = this.config.KafkaBootstrap
 	m["KAFKA_TOPIC"] = instance.Topic
@@ -151,18 +155,45 @@ func (this *Controller) getEnv(instance *model.Instance) (m map[string]string, e
 	m["KAFKA_OFFSET"] = instance.Offset
 	m["FILTER_QUERY"] = "."
 	switch instance.FilterType {
-	case "deviceId":
+	case filterDevice:
+		if this.config.VerifyInput {
+			ok, err := verification.VerifyDevice(instance.Filter, token, userId, &this.config)
+			if err != nil {
+				return nil, err, http.StatusInternalServerError
+			}
+			if !ok {
+				return nil, errors.New("filtered device not found"), http.StatusNotFound
+			}
+		}
 		m["FILTER_QUERY"] += "device_id==\"" + instance.Filter + "\""
-	case "operatorId":
+	case filterOperator:
 		parts := strings.Split(instance.Filter, ":")
 		if len(parts) != 2 {
-			return m, errors.New("filterType is operatorId, but filter has not exactly two parts")
+			return m, errors.New("filterType is operatorId, but filter has not exactly two parts"), http.StatusBadRequest
+		}
+		if this.config.VerifyInput {
+			ok, err := verification.VerifyPipeline(parts[0], token, userId, &this.config)
+			if err != nil {
+				return nil, err, http.StatusInternalServerError
+			}
+			if !ok {
+				return nil, errors.New("filtered pipeline not found"), http.StatusNotFound
+			}
 		}
 		m["FILTER_QUERY"] += "pipeline_id==\"" + parts[0] + "\"and.operator_id==\"" + parts[1] + "\""
-	case "import_id":
+	case filterImport:
+		if this.config.VerifyInput {
+			ok, err := verification.VerifyImport(instance.Filter, token, userId, &this.config)
+			if err != nil {
+				return nil, err, http.StatusInternalServerError
+			}
+			if !ok {
+				return nil, errors.New("filtered import not found"), http.StatusNotFound
+			}
+		}
 		m["FILTER_QUERY"] += "import_id==\"" + instance.Filter + "\""
 	default:
-		return m, errors.New("unknown filterType")
+		return m, errors.New("unknown filterType"), http.StatusBadRequest
 	}
 	baseTopic := "export/" + instance.UserId + "/" + instance.Id + "/"
 	if instance.CustomMqttBroker != nil {
@@ -183,7 +214,7 @@ func (this *Controller) getEnv(instance *model.Instance) (m map[string]string, e
 		}
 	} else {
 		if instance.CustomMqttUser != nil || instance.CustomMqttPassword != nil || instance.CustomMqttBaseTopic != nil {
-			return nil, errors.New("must not set custom mqtt options with default broker")
+			return nil, errors.New("must not set custom mqtt options with default broker"), http.StatusBadRequest
 		}
 		m["MQTT_BROKER"] = this.config.MqttBroker
 		m["MQTT_USER"] = this.config.MqttUser
@@ -201,7 +232,7 @@ func (this *Controller) getEnv(instance *model.Instance) (m map[string]string, e
 	m["MQTT_TOPIC_MAPPING"] += "]"
 	m["DEBUG"] = "false"
 
-	return m, nil
+	return m, nil, http.StatusOK
 }
 
 func refreshConsumerGroupId(instance model.Instance, env map[string]string) error {

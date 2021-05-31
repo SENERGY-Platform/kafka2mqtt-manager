@@ -23,7 +23,7 @@ import (
 type Controller interface {
 	ListInstances(userId string, limit int64, offset int64, sort string, asc bool, search string, includeGenerated bool) (results []model.Instance, total int64, err error, errCode int)
 	ReadInstance(id string, userId string) (result model.Instance, err error, errCode int)
-	CreateInstance(instance model.Instance, userId string) (result model.Instance, err error, code int)
-	SetInstance(importType model.Instance, userId string) (err error, code int)
+	CreateInstance(instance model.Instance, userId string, token string) (result model.Instance, err error, code int)
+	SetInstance(importType model.Instance, userId string, token string) (err error, code int)
 	DeleteInstances(ids []string, userId string) (err error, errCode int)
 }
