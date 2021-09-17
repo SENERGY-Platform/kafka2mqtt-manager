@@ -19,6 +19,7 @@ package util
 import (
 	"log"
 	"net/http"
+	"time"
 )
 
 func NewLogger(handler http.Handler) *LoggerMiddleWare {
@@ -29,17 +30,38 @@ type LoggerMiddleWare struct {
 	handler http.Handler
 }
 
-func (this *LoggerMiddleWare) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	this.log(r)
+func (this *LoggerMiddleWare) ServeHTTP(w http.ResponseWriter, request *http.Request) {
+	response := &ResponseWriterWithStatusCodeLog{Parent: w, Status: 200}
+	now := time.Now()
+	defer this.log(request, response, now)
 	if this.handler != nil {
-		this.handler.ServeHTTP(w, r)
+		this.handler.ServeHTTP(response, request)
 	} else {
-		http.Error(w, "Forbidden", 403)
+		http.Error(response, "Forbidden", 403)
 	}
 }
 
-func (this *LoggerMiddleWare) log(request *http.Request) {
+func (this *LoggerMiddleWare) log(request *http.Request, response *ResponseWriterWithStatusCodeLog, t time.Time) {
 	method := request.Method
 	path := request.URL
-	log.Printf("%v [%v] %v \n", request.RemoteAddr, method, path)
+	status := response.Status
+	log.Printf("[%v] %v %v %v\n", method, path, status, time.Since(t))
+}
+
+type ResponseWriterWithStatusCodeLog struct {
+	Parent http.ResponseWriter
+	Status int
+}
+
+func (this *ResponseWriterWithStatusCodeLog) Header() http.Header {
+	return this.Parent.Header()
+}
+
+func (this *ResponseWriterWithStatusCodeLog) Write(payload []byte) (int, error) {
+	return this.Parent.Write(payload)
+}
+
+func (this *ResponseWriterWithStatusCodeLog) WriteHeader(statusCode int) {
+	this.Status = statusCode
+	this.Parent.WriteHeader(statusCode)
 }
