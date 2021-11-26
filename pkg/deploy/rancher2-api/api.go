@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
 	"net/http"
+	"strconv"
 
 	"github.com/parnurzeal/gorequest"
 )
@@ -100,3 +101,26 @@ func (r *Rancher2) RemoveContainer(id string) (err error) {
 	return
 }
 
+func (r *Rancher2) ContainerExists(id string) (exists bool, err error) {
+	request := gorequest.New().SetBasicAuth(r.accessKey, r.secretKey)
+	resp, _, errs := request.Get(r.url + "projects/" + r.projectId + "/workloads/deployment:" +
+		r.namespaceId + ":" + id).End()
+	if len(errs) > 0 {
+		return false, errs[0]
+	}
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
+		return false, errors.New("unexpected status " + strconv.Itoa(resp.StatusCode))
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		resp, _, errs = request.Get(r.url + "projects/" + r.projectId + "/workloads/job:" +
+			r.namespaceId + ":" + id).End()
+		if len(errs) > 0 {
+			return false, errs[0]
+		}
+		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
+			return false, errors.New("unexpected status " + strconv.Itoa(resp.StatusCode))
+		}
+		return resp.StatusCode == http.StatusOK, nil
+	}
+	return true, nil
+}

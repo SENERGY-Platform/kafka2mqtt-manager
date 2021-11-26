@@ -135,10 +135,16 @@ func (r Rancher) UpdateContainer(id string, name string, image string, env map[s
 	}
 }
 
-func (r Rancher) exists(id string) bool {
+func (r Rancher) ContainerExists(id string) (exists bool, err error) {
 	request := gorequest.New().SetBasicAuth(r.accessKey, r.secretKey)
-	resp, _, _ := request.Get(r.url + "services/" + id).End()
-	return resp.StatusCode == http.StatusOK
+	resp, _, errs := request.Get(r.url + "services/" + id).End()
+	if len(errs) > 0 {
+		return false, errs[0]
+	}
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNotFound {
+		return false, errors.New("unexpected status " + strconv.Itoa(resp.StatusCode))
+	}
+	return resp.StatusCode == http.StatusOK, nil
 }
 
 func (r Rancher) selfCheck() error {

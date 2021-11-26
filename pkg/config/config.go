@@ -52,6 +52,7 @@ type Config struct {
 	PermissionSearchUrl       string `json:"permission_search_url"`
 	ImportDeployUrl           string `json:"import_deploy_url"`
 	AnalyticsPipelineUrl      string `json:"analytics_pipeline_url"`
+	StartupEnsureDeployed     bool   `json:"startup_ensure_deployed"`
 
 	Debug bool `json:"debug"`
 }

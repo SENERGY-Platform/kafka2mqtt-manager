@@ -161,15 +161,18 @@ func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64,
 	}
 	var filter bson.M
 	if includeGenerated {
-		filter = bson.M{ownerKey: owner, searchKey: primitive.Regex{
+		filter = bson.M{searchKey: primitive.Regex{
 			Pattern: ".*" + search + ".*",
 		}}
 	} else {
 		// filter for generatedKey == False || generatedKey == undefined to find legacy instances
-		filter = bson.M{ownerKey: owner, "$or": []bson.M{{generatedKey: false}, {generatedKey: bson.M{"$exists": false}}},
+		filter = bson.M{"$or": []bson.M{{generatedKey: false}, {generatedKey: bson.M{"$exists": false}}},
 			searchKey: primitive.Regex{
 				Pattern: ".*" + search + ".*",
 			}}
+	}
+	if owner != "" {
+		filter[ownerKey] = owner
 	}
 	cursor, err := this.instanceCollection().Find(ctx, filter, opt)
 	if err != nil {

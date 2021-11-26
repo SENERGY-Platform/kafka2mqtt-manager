@@ -19,6 +19,7 @@ package dockerClient
 import (
 	"context"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	docker "github.com/docker/docker/client"
@@ -45,7 +46,7 @@ func New(config config.Config, ctx context.Context, wg *sync.WaitGroup) (client 
 }
 
 func (this *DockerClient) CreateContainer(name string, image string, env map[string]string, restart bool) (id string, err error) {
-	ctx := context.Background()
+	ctx, _ := util.GetTimeoutContext()
 	if this.config.DockerPull == true {
 		_, err = this.cli.ImagePull(ctx, image, types.ImagePullOptions{})
 		if err != nil {
@@ -54,7 +55,7 @@ func (this *DockerClient) CreateContainer(name string, image string, env map[str
 	}
 	dockerEnv := []string{}
 	for k, v := range env {
-		dockerEnv = append(dockerEnv, k + "=" + v)
+		dockerEnv = append(dockerEnv, k+"="+v)
 	}
 	var restartPolicy container.RestartPolicy
 	if restart {
@@ -66,7 +67,7 @@ func (this *DockerClient) CreateContainer(name string, image string, env map[str
 		Image: image,
 		Env:   dockerEnv,
 	}, &container.HostConfig{
-		NetworkMode: container.NetworkMode(this.config.DockerNetwork),
+		NetworkMode:   container.NetworkMode(this.config.DockerNetwork),
 		RestartPolicy: restartPolicy,
 	}, nil, name)
 	if err != nil {
@@ -98,4 +99,16 @@ func (this *DockerClient) RemoveContainer(id string) (err error) {
 		return err
 	}
 	return nil
+}
+
+func (this *DockerClient) ContainerExists(id string) (exists bool, err error) {
+	ctx, _ := util.GetTimeoutContext()
+	_, err = this.cli.ContainerInspect(ctx, id)
+	if err != nil {
+		if docker.IsErrNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

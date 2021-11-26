@@ -19,6 +19,7 @@ package controller
 import (
 	"errors"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/util"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/verification"
 	"github.com/hashicorp/go-uuid"
 	"log"
@@ -66,7 +67,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 	instance.Id = idPrefix + id
 	instance.UserId = userId
 
-	env, err, code := this.getEnv(&instance, token, userId)
+	env, err, code := this.getEnv(&instance, token, userId, true)
 	if err != nil {
 		return result, err, code
 	}
@@ -98,7 +99,7 @@ func (this *Controller) SetInstance(instance model.Instance, userId string, toke
 	}
 	instance.UserId = userId
 
-	env, err, code := this.getEnv(&instance, token, userId)
+	env, err, code := this.getEnv(&instance, token, userId, true)
 	if err != nil {
 		return err, code
 	}
@@ -147,7 +148,47 @@ func (this *Controller) DeleteInstances(ids []string, userId string) (err error,
 	return nil, http.StatusNoContent
 }
 
-func (this *Controller) getEnv(instance *model.Instance, token string, userId string) (m map[string]string, err error, code int) {
+func (this *Controller) EnsureAllInstancesDeployed() (err error) {
+	var offset int64 = 0
+	var batchSize int64 = 100
+	for {
+		ctx, _ := util.GetTimeoutContext()
+		instances, _, err := this.db.ListInstances(ctx, batchSize, offset, "name", "", true, "", true)
+		if err != nil {
+			return err
+		}
+		if len(instances) == 0 {
+			return nil // done
+		}
+		offset += int64(len(instances))
+		for _, instance := range instances {
+			exists, err := this.deploymentClient.ContainerExists(instance.ServiceId)
+			if err != nil {
+				return err
+			}
+			if exists {
+				log.Println(instance.Id + " still exists")
+				continue
+			}
+			log.Println("Recreating " + instance.Id)
+			env, err, _ := this.getEnv(&instance, "", instance.UserId, false)
+			if err != nil {
+				return err
+			}
+			instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, env, true)
+			if err != nil {
+				return err
+			}
+			ctx, _ := util.GetTimeoutContext()
+			err = this.db.SetInstance(ctx, instance, instance.UserId)
+			if err != nil {
+				return err
+			}
+		}
+	}
+}
+
+func (this *Controller) getEnv(instance *model.Instance, token string, userId string, verify bool) (m map[string]string, err error, code int) {
 	m = map[string]string{}
 	m["KAFKA_BOOTSTRAP"] = this.config.KafkaBootstrap
 	m["KAFKA_TOPIC"] = instance.Topic
@@ -156,7 +197,7 @@ func (this *Controller) getEnv(instance *model.Instance, token string, userId st
 	m["FILTER_QUERY"] = "."
 	switch instance.FilterType {
 	case filterDevice:
-		if this.config.VerifyInput {
+		if this.config.VerifyInput && verify {
 			ok, err := verification.VerifyDevice(instance.Filter, token, userId, &this.config)
 			if err != nil {
 				return nil, err, http.StatusInternalServerError
@@ -171,7 +212,7 @@ func (this *Controller) getEnv(instance *model.Instance, token string, userId st
 		if len(parts) != 2 {
 			return m, errors.New("filterType is operatorId, but filter has not exactly two parts"), http.StatusBadRequest
 		}
-		if this.config.VerifyInput {
+		if this.config.VerifyInput && verify {
 			ok, err := verification.VerifyPipeline(parts[0], token, userId, &this.config)
 			if err != nil {
 				return nil, err, http.StatusInternalServerError
@@ -182,7 +223,7 @@ func (this *Controller) getEnv(instance *model.Instance, token string, userId st
 		}
 		m["FILTER_QUERY"] += "pipeline_id==\"" + parts[0] + "\"and.operator_id==\"" + parts[1] + "\""
 	case filterImport:
-		if this.config.VerifyInput {
+		if this.config.VerifyInput && verify {
 			ok, err := verification.VerifyImport(instance.Filter, token, userId, &this.config)
 			if err != nil {
 				return nil, err, http.StatusInternalServerError

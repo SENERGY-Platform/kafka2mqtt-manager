@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 InfAI (CC SES)
+ * Copyright 2021 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package deploy
+package util
 
-type DeploymentClient interface {
-	CreateContainer(name string, image string, env map[string]string, restart bool) (id string, err error)
-	UpdateContainer(id string, name string, image string, env map[string]string, restart bool) (newId string, err error)
-	RemoveContainer(id string) (err error)
-	ContainerExists(id string) (exists bool, err error)
+import (
+	"context"
+	"time"
+)
+
+func GetTimeoutContext() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), 10*time.Second)
 }
