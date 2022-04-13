@@ -49,13 +49,20 @@ func (r *Rancher2) UpdateContainer(id string, name string, image string, env map
 
 func (r *Rancher2) CreateContainer(name string, image string, env map[string]string, restart bool) (id string, err error) {
 	request := gorequest.New().SetBasicAuth(r.accessKey, r.secretKey).TLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	r2Env := []Env{}
+	for k, v := range env {
+		r2Env = append(r2Env, Env{
+			Name:  k,
+			Value: v,
+		})
+	}
 	reqBody := &Request{
 		Name:        name,
 		NamespaceId: r.namespaceId,
 		Containers: []Container{{
 			Image:           image,
 			Name:            name,
-			Environment:     env,
+			Env:             r2Env,
 			ImagePullPolicy: "Always",
 		}},
 		Scheduling: Scheduling{Scheduler: "default-scheduler", Node: Node{RequireAll: []string{"role=worker"}}},
