@@ -24,6 +24,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	docker "github.com/docker/docker/client"
 	"sync"
+	"log"
 )
 
 type DockerClient struct {
@@ -50,6 +51,7 @@ func (this *DockerClient) CreateContainer(name string, image string, env map[str
 	if this.config.DockerPull == true {
 		_, err = this.cli.ImagePull(ctx, image, types.ImagePullOptions{})
 		if err != nil {
+			log.Println("Cant pull image: " + err.Error())
 			return id, err
 		}
 	}
@@ -71,11 +73,13 @@ func (this *DockerClient) CreateContainer(name string, image string, env map[str
 		RestartPolicy: restartPolicy,
 	}, nil, name)
 	if err != nil {
+		log.Println("Cant create container: " + err.Error())
 		return id, err
 	}
 
 	err = this.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
+		log.Println("Cant start container: " + err.Error())
 		return id, err
 	}
 	return resp.ID, err

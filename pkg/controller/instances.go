@@ -69,6 +69,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 
 	env, err, code := this.getEnv(&instance, token, userId, true)
 	if err != nil {
+		log.Println("Cant get env: " + err.Error())
 		return result, err, code
 	}
 
@@ -271,7 +272,7 @@ func (this *Controller) getEnv(instance *model.Instance, token string, userId st
 		}
 	}
 	m["MQTT_TOPIC_MAPPING"] += "]"
-	m["DEBUG"] = "false"
+	m["DEBUG"] = "true"
 
 	return m, nil, http.StatusOK
 }

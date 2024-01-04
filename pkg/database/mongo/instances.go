@@ -195,6 +195,9 @@ func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64,
 
 func (this *Mongo) SetInstance(ctx context.Context, instance model.Instance, owner string) error {
 	_, err := this.instanceCollection().ReplaceOne(ctx, bson.M{ownerKey: owner, idKey: instance.Id}, instance, options.Replace().SetUpsert(true))
+	if err != nil {
+		log.Println("Cant set instance to db: " + err.Error())
+	}
 	return err
 }
 

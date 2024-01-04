@@ -18,13 +18,15 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
-	"github.com/julienschmidt/httprouter"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
+	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
@@ -39,7 +41,7 @@ type instanceList struct {
 
 const authHeader = "Authorization"
 
-func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter.Router) {
+func DeploymentEndpoints(config config.Config, control Controller, router *httprouter.Router) {
 	resource := "/instances"
 
 	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
@@ -47,11 +49,17 @@ func DeploymentEndpoints(_ config.Config, control Controller, router *httprouter
 		err := json.NewDecoder(request.Body).Decode(&instance)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
+			log.Println("ERROR: unable to decode instance request: ", err)
+			if config.Debug {
+				b, _ := io.ReadAll(request.Body)
+				log.Println("Payload: " + string(b))
+			}
 			return
 		}
 		result, err, code := control.CreateInstance(instance, getUserId(request), request.Header.Get(authHeader))
 		if err != nil {
 			http.Error(writer, err.Error(), code)
+			log.Println("ERROR: cant create instance: ", err)
 			return
 		}
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")

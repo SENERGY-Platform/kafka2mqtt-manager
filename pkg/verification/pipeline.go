@@ -17,9 +17,11 @@
 package verification
 
 import (
-	"encoding/json"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
 	"net/http"
+	"strconv"
+	"io"
+	"log"
 )
 
 type pipeline struct {
@@ -29,21 +31,20 @@ type pipeline struct {
 func VerifyPipeline(id string, token string, userId string, config *config.Config) (bool, error) {
 	req, err := http.NewRequest("GET", config.AnalyticsPipelineUrl+"/pipeline/"+id, nil)
 	if err != nil {
+		log.Println("Cant create request to get pipeline: ", err.Error())
 		return false, err
 	}
 	req.Header.Set("Authorization", token)
 	req.Header.Set("X-UserId", userId)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
+		log.Println("Cant get pipeline information: ", err.Error())
 		return false, err
 	}
 	if resp.StatusCode != http.StatusOK {
+		payload, _ := io.ReadAll(resp.Body)
+		log.Println("Cant get pipeline information, code: " + strconv.Itoa(resp.StatusCode) + " response: " + string(payload))
 		return false, nil
 	}
-	var pipe pipeline
-	err = json.NewDecoder(resp.Body).Decode(&pipe)
-	if err != nil {
-		return false, err
-	}
-	return pipe.Id != "", nil
+	return true, nil
 }
