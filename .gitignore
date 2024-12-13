@@ -1,3 +1,4 @@
 .idea
 *.iml
 process-sync
+kafka2mqtt-manager

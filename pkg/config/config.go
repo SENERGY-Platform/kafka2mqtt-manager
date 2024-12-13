@@ -49,15 +49,15 @@ type Config struct {
 	RancherNamespaceId        string `json:"rancher_namespace_id"`
 	RancherProjectId          string `json:"rancher_project_id"`
 	VerifyInput               bool   `json:"verify_input"`
-	PermissionSearchUrl       string `json:"permission_search_url"`
 	ImportDeployUrl           string `json:"import_deploy_url"`
 	AnalyticsPipelineUrl      string `json:"analytics_pipeline_url"`
 	StartupEnsureDeployed     bool   `json:"startup_ensure_deployed"`
+	PermissionsV2Url          string `json:"permissions_v2_url"`
 
 	Debug bool `json:"debug"`
 }
 
-//loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
+// loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)
 func Load(location string) (config Config, err error) {
 	file, err := os.Open(location)
 	if err != nil {

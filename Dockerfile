@@ -1,4 +1,4 @@
-FROM golang:1.17 AS builder
+FROM golang:1.23 AS builder
 
 COPY . /go/src/app
 WORKDIR /go/src/app
@@ -16,6 +16,6 @@ COPY --from=builder /go/src/app/config.json .
 COPY --from=builder /go/src/app/version.txt .
 
 EXPOSE 8080
-LABEL org.opencontainers.image.source https://github.com/SENERGY-Platform/kafka2mqtt-manager
+LABEL org.opencontainers.image.source=https://github.com/SENERGY-Platform/kafka2mqtt-manager
 
 ENTRYPOINT ["./app"]

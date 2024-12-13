@@ -199,7 +199,7 @@ func (this *Controller) getEnv(instance *model.Instance, token string, userId st
 	switch instance.FilterType {
 	case filterDevice:
 		if this.config.VerifyInput && verify {
-			ok, err := verification.VerifyDevice(instance.Filter, token, userId, &this.config)
+			ok, err := verification.VerifyDevice(instance.Filter, token, &this.config)
 			if err != nil {
 				return nil, err, http.StatusInternalServerError
 			}

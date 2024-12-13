@@ -24,7 +24,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 	"log"
 	"strings"
 )
@@ -140,7 +139,7 @@ func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64,
 	if !asc {
 		direction = int32(-1)
 	}
-	opt.SetSort(bsonx.Doc{{sortby, bsonx.Int32(direction)}})
+	opt.SetSort(bson.D{{sortby, direction}})
 
 	searchKey := nameKey
 	searchSplit := strings.Split(search, ":")

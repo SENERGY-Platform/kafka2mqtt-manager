@@ -23,8 +23,8 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	docker "github.com/docker/docker/client"
-	"sync"
 	"log"
+	"sync"
 )
 
 type DockerClient struct {
@@ -71,7 +71,7 @@ func (this *DockerClient) CreateContainer(name string, image string, env map[str
 	}, &container.HostConfig{
 		NetworkMode:   container.NetworkMode(this.config.DockerNetwork),
 		RestartPolicy: restartPolicy,
-	}, nil, name)
+	}, nil, nil, name)
 	if err != nil {
 		log.Println("Cant create container: " + err.Error())
 		return id, err
