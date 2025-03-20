@@ -57,7 +57,8 @@ func (r *Rancher2) CreateContainer(name string, image string, userid string, env
 		})
 	}
 	labels := map[string]string{
-		"user": userid,
+		"user":       userid,
+		"kafka2mqtt": name,
 	}
 	reqBody := &Request{
 		Name:        name,
@@ -76,8 +77,7 @@ func (r *Rancher2) CreateContainer(name string, image string, userid string, env
 	request.Url = r.url + "projects/" + r.projectId
 	if restart {
 		request.Url += "/workloads"
-		reqBody.Labels = map[string]string{"kafka2mqtt": name}
-		reqBody.Selector = Selector{MatchLabels: map[string]string{"kafka2mqtt": name}}
+		reqBody.Selector = Selector{MatchLabels: labels}
 	} else {
 		request.Url += "/jobs"
 	}
