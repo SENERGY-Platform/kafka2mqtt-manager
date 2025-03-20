@@ -73,7 +73,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 		return result, err, code
 	}
 
-	instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), instance.UserId, this.config.TransferImage, env, true)
+	instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, instance.UserId, env, true)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
