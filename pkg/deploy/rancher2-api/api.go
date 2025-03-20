@@ -39,15 +39,15 @@ func New(config config.Config) *Rancher2 {
 	return &Rancher2{config.RancherUrl, config.RancherAccessKey, config.RancherSecretKey, config.RancherNamespaceId, config.RancherProjectId}
 }
 
-func (r *Rancher2) UpdateContainer(id string, name string, image string, env map[string]string, restart bool) (newId string, err error) {
+func (r *Rancher2) UpdateContainer(id string, name string, image string, userid string, env map[string]string, restart bool) (newId string, err error) {
 	err = r.RemoveContainer(id)
 	if err != nil {
 		return newId, err
 	}
-	return r.CreateContainer(name, image, env, restart)
+	return r.CreateContainer(name, image, userid, env, restart)
 }
 
-func (r *Rancher2) CreateContainer(name string, image string, env map[string]string, restart bool) (id string, err error) {
+func (r *Rancher2) CreateContainer(name string, image string, userid string, env map[string]string, restart bool) (id string, err error) {
 	request := gorequest.New().SetBasicAuth(r.accessKey, r.secretKey).TLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	r2Env := []Env{}
 	for k, v := range env {
@@ -55,6 +55,9 @@ func (r *Rancher2) CreateContainer(name string, image string, env map[string]str
 			Name:  k,
 			Value: v,
 		})
+	}
+	labels := map[string]string{
+		"user": userid,
 	}
 	reqBody := &Request{
 		Name:        name,
@@ -64,7 +67,9 @@ func (r *Rancher2) CreateContainer(name string, image string, env map[string]str
 			Name:            name,
 			Env:             r2Env,
 			ImagePullPolicy: "Always",
+			Labels:          labels,
 		}},
+		Labels:     labels,
 		Scheduling: Scheduling{Scheduler: "default-scheduler", Node: Node{RequireAll: []string{"role=worker"}}},
 	}
 	request.Method = "POST"

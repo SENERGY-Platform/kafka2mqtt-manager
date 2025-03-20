@@ -35,8 +35,8 @@ type Database interface {
 }
 
 type DeploymentClient interface {
-	CreateContainer(name string, image string, env map[string]string, restart bool) (id string, err error)
-	UpdateContainer(id string, name string, image string, env map[string]string, restart bool) (newId string, err error)
+	CreateContainer(name string, image string, userid string, env map[string]string, restart bool) (id string, err error)
+	UpdateContainer(id string, name string, image string, userid string, env map[string]string, restart bool) (newId string, err error)
 	RemoveContainer(id string) (err error)
 	ContainerExists(id string) (exists bool, err error)
 }

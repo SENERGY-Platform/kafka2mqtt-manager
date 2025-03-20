@@ -73,7 +73,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 		return result, err, code
 	}
 
-	instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, env, true)
+	instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), instance.UserId, this.config.TransferImage, env, true)
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
@@ -112,7 +112,7 @@ func (this *Controller) SetInstance(instance model.Instance, userId string, toke
 		}
 	}
 
-	instance.ServiceId, err = this.deploymentClient.UpdateContainer(existing.ServiceId, containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, env, true)
+	instance.ServiceId, err = this.deploymentClient.UpdateContainer(existing.ServiceId, containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, instance.UserId, env, true)
 	if err != nil {
 		return err, http.StatusInternalServerError
 	}
@@ -176,7 +176,7 @@ func (this *Controller) EnsureAllInstancesDeployed() (err error) {
 			if err != nil {
 				return err
 			}
-			instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, env, true)
+			instance.ServiceId, err = this.deploymentClient.CreateContainer(containerNamePrefix+strings.TrimPrefix(instance.Id, idPrefix), this.config.TransferImage, instance.UserId, env, true)
 			if err != nil {
 				return err
 			}

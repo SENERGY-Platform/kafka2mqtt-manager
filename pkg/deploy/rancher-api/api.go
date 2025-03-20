@@ -44,7 +44,7 @@ func New(config config.Config) (*Rancher, error) {
 	return r, nil
 }
 
-func (r Rancher) CreateContainer(name string, image string, env map[string]string, restart bool) (id string, err error) {
+func (r Rancher) CreateContainer(name string, image string, _ string, env map[string]string, restart bool) (id string, err error) {
 	id, err, _ = r.createContainer(name, image, env, restart)
 	return id, err
 }
@@ -113,7 +113,7 @@ func (r Rancher) RemoveContainer(id string) (err error) {
 	return
 }
 
-func (r Rancher) UpdateContainer(id string, name string, image string, env map[string]string, restart bool) (newId string, err error) {
+func (r Rancher) UpdateContainer(id string, name string, _ string, image string, env map[string]string, restart bool) (newId string, err error) {
 	err = r.RemoveContainer(id)
 	if err != nil {
 		return newId, err
