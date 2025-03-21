@@ -35,8 +35,8 @@ var endpoints []func(config config.Config, control Controller, router *httproute
 func Start(config config.Config, ctx context.Context, control Controller, permv2 client.Client) (err error) {
 	log.Println("start api on " + config.ApiPort)
 	router := Router(config, control)
+	router = client.EmbedPermissionsClientIntoRouter(permv2, router, "/permissions/")
 	handler := util.NewLogger(util.NewCors(router))
-	client.EmbedPermissionsClientIntoRouter(permv2, handler, "/permissions/")
 	server := &http.Server{Addr: ":" + config.ApiPort, Handler: handler, WriteTimeout: 10 * time.Second, ReadTimeout: 2 * time.Second, ReadHeaderTimeout: 2 * time.Second}
 	go func() {
 		log.Println("listening on ", server.Addr)
