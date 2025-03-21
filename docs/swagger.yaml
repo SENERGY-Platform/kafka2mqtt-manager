@@ -1,0 +1,240 @@
+basePath: /
+definitions:
+  model.Instance:
+    properties:
+      CreatedAt:
+        type: string
+      CustomMqttBaseTopic:
+        type: string
+      CustomMqttBroker:
+        type: string
+      CustomMqttPassword:
+        type: string
+      CustomMqttUser:
+        type: string
+      Description:
+        type: string
+      EntityName:
+        type: string
+      Filter:
+        type: string
+      FilterType:
+        type: string
+      ID:
+        type: string
+      Name:
+        type: string
+      Offset:
+        type: string
+      ServiceName:
+        type: string
+      Topic:
+        type: string
+      UpdatedAt:
+        type: string
+      Values:
+        items:
+          $ref: '#/definitions/model.Value'
+        type: array
+      generated:
+        type: boolean
+    required:
+    - EntityName
+    - Filter
+    - FilterType
+    - Name
+    - Offset
+    - ServiceName
+    - Topic
+    type: object
+  model.Value:
+    properties:
+      Name:
+        type: string
+      Path:
+        type: string
+    type: object
+info:
+  contact: {}
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Kafka2MQTT API
+  version: "0.1"
+paths:
+  /instances:
+    delete:
+      description: Deletes a single instance
+      parameters:
+      - description: IDs of the instances to delete
+        in: body
+        name: id
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Delete instances
+    get:
+      description: Provides a list of instances
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Instance'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get instances
+    post:
+      consumes:
+      - application/json
+      description: Creates an instance
+      parameters:
+      - description: Instance to create
+        in: body
+        name: instance
+        required: true
+        schema:
+          $ref: '#/definitions/model.Instance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Instance'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Create an instance
+    put:
+      consumes:
+      - application/json
+      description: Updates an instance
+      parameters:
+      - description: Instance to update
+        in: body
+        name: instance
+        required: true
+        schema:
+          $ref: '#/definitions/model.Instance'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Update an instance
+  /instances/{id}:
+    delete:
+      description: Deletes a single instance
+      parameters:
+      - description: ID of the instance to delete
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Delete instance
+    get:
+      description: Provides a single instance
+      parameters:
+      - description: ID of the requested instance
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Instance'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: Get instance
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

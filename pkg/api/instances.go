@@ -41,6 +41,97 @@ type instanceList struct {
 
 const authHeader = "Authorization"
 
+// Query godoc
+// @Summary      Create an instance
+// @Description  Creates an instance
+// @Accept       json
+// @Produce      json
+// @Security Bearer
+// @Param        instance body model.Instance true "Instance to create"
+// @Success      200 {object}  model.Instance
+// @Failure      400
+// @Failure      401
+// @Failure      403
+// @Failure      404
+// @Failure      500
+// @Router       /instances [POST]
+func PostInstances() {} // for doc generation
+
+// Query godoc
+// @Summary      Get instances
+// @Description  Provides a list of instances
+// @Produce      json
+// @Security Bearer
+// @Success      200 {array}  model.Instance
+// @Failure      400
+// @Failure      401
+// @Failure      403
+// @Failure      404
+// @Failure      500
+// @Router       /instances [GET]
+func GetInstances() {} // for doc generation
+
+// Query godoc
+// @Summary      Get instance
+// @Description  Provides a single instance
+// @Produce      json
+// @Security Bearer
+// @Param        id path string true "ID of the requested instance"
+// @Success      200 {object}  model.Instance
+// @Failure      400
+// @Failure      401
+// @Failure      403
+// @Failure      404
+// @Failure      500
+// @Router       /instances/{id} [GET]
+func GetInstance() {} // for doc generation
+
+// Query godoc
+// @Summary      Update an instance
+// @Description  Updates an instance
+// @Accept       json
+// @Produce      json
+// @Security Bearer
+// @Param        instance body model.Instance true "Instance to update"
+// @Success      200
+// @Failure      400
+// @Failure      401
+// @Failure      403
+// @Failure      404
+// @Failure      500
+// @Router       /instances [PUT]
+func PutInstances() {} // for doc generation
+
+// Query godoc
+// @Summary      Delete instance
+// @Description  Deletes a single instance
+// @Produce      json
+// @Security Bearer
+// @Param        id path string true "ID of the instance to delete"
+// @Success      200
+// @Failure      400
+// @Failure      401
+// @Failure      403
+// @Failure      404
+// @Failure      500
+// @Router       /instances/{id} [DELETE]
+func DeleteInstance() {} // for doc generation
+
+// Query godoc
+// @Summary      Delete instances
+// @Description  Deletes a single instance
+// @Produce      json
+// @Security Bearer
+// @Param        id body []string true "IDs of the instances to delete"
+// @Success      200
+// @Failure      400
+// @Failure      401
+// @Failure      403
+// @Failure      404
+// @Failure      500
+// @Router       /instances [DELETE]
+func DeleteInstances() {} // for doc generation
+
 func DeploymentEndpoints(config config.Config, control Controller, router *httprouter.Router) {
 	resource := "/instances"
 

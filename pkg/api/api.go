@@ -51,6 +51,16 @@ func Start(config config.Config, ctx context.Context, control Controller) (err e
 	return nil
 }
 
+// GetRouter doc
+// @title         Kafka2MQTT API
+// @version       0.1
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @BasePath  /
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
 func Router(config config.Config, control Controller) http.Handler {
 	router := httprouter.New()
 	log.Println("add heart beat endpoint")
