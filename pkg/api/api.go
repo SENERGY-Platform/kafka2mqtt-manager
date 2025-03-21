@@ -18,22 +18,25 @@ package api
 
 import (
 	"context"
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/api/util"
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
-	"github.com/julienschmidt/httprouter"
 	"log"
 	"net/http"
 	"reflect"
 	"runtime"
 	"time"
+
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/api/util"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	"github.com/SENERGY-Platform/permissions-v2/pkg/client"
+	"github.com/julienschmidt/httprouter"
 )
 
 var endpoints []func(config config.Config, control Controller, router *httprouter.Router)
 
-func Start(config config.Config, ctx context.Context, control Controller) (err error) {
+func Start(config config.Config, ctx context.Context, control Controller, permv2 client.Client) (err error) {
 	log.Println("start api on " + config.ApiPort)
 	router := Router(config, control)
 	handler := util.NewLogger(util.NewCors(router))
+	client.EmbedPermissionsClientIntoRouter(permv2, handler, "/permissions/")
 	server := &http.Server{Addr: ":" + config.ApiPort, Handler: handler, WriteTimeout: 10 * time.Second, ReadTimeout: 2 * time.Second, ReadHeaderTimeout: 2 * time.Second}
 	go func() {
 		log.Println("listening on ", server.Addr)

@@ -36,7 +36,7 @@ func init() {
 type instanceList struct {
 	Instances model.Instances `json:"instances"`
 	Count     int             `json:"count"`
-	Total     int64           `json:"total"`
+	Total     int             `json:"total"`
 }
 
 const authHeader = "Authorization"
@@ -192,7 +192,7 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 		search := request.URL.Query().Get("search")
 
 		includeGenerated := strings.ToLower(request.URL.Query().Get("generated")) != "false"
-		results, total, err, errCode := control.ListInstances(getUserId(request), limitInt, offsetInt, orderBy, asc, search, includeGenerated)
+		results, total, err, errCode := control.ListInstances(request.Header.Get(authHeader), limitInt, offsetInt, orderBy, asc, search, includeGenerated)
 		if err != nil {
 			http.Error(writer, err.Error(), errCode)
 			return
@@ -215,7 +215,7 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 
 	router.GET(resource+"/:id", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		id := params.ByName("id")
-		result, err, errCode := control.ReadInstance(id, getUserId(request))
+		result, err, errCode := control.ReadInstance(request.Header.Get(authHeader), id)
 		if err != nil {
 			http.Error(writer, err.Error(), errCode)
 			return
@@ -230,7 +230,7 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 
 	router.DELETE(resource+"/:id", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		id := params.ByName("id")
-		err, errCode := control.DeleteInstances([]string{id}, getUserId(request))
+		err, errCode := control.DeleteInstances(request.Header.Get(authHeader), []string{id})
 		if err != nil {
 			http.Error(writer, err.Error(), errCode)
 			return
@@ -246,7 +246,7 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
-		err, errCode := control.DeleteInstances(ids, getUserId(request))
+		err, errCode := control.DeleteInstances(request.Header.Get(authHeader), ids)
 		if err != nil {
 			http.Error(writer, err.Error(), errCode)
 			return

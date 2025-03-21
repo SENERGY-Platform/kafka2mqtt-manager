@@ -27,11 +27,11 @@ type Driver interface {
 }
 
 type Database interface {
-	ListInstances(ctx context.Context, limit int64, offset int64, sort string, owner string, asc bool, search string, includeGenerated bool) (result []model.Instance, count int64, err error)
-	GetInstance(ctx context.Context, id string, owner string) (instance model.Instance, exists bool, err error)
-	SetInstance(ctx context.Context, instance model.Instance, owner string) error
-	GetInstances(ctx context.Context, ids []string, owner string) (result []model.Instance, allExist bool, err error)
-	RemoveInstances(ctx context.Context, ids []string, owner string) error
+	ListInstances(ctx context.Context, limit int64, offset int64, sort string, asc bool, search string, includeGenerated bool, ids []string) (result []model.Instance, err error)
+	GetInstance(ctx context.Context, id string) (instance model.Instance, exists bool, err error)
+	SetInstance(ctx context.Context, instance model.Instance) error
+	GetInstances(ctx context.Context, ids []string) (result []model.Instance, allExist bool, err error)
+	RemoveInstances(ctx context.Context, ids []string) error
 }
 
 type DeploymentClient interface {

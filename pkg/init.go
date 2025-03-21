@@ -19,6 +19,9 @@ package lib
 import (
 	"context"
 	"errors"
+	"log"
+	"sync"
+
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/api"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/controller"
@@ -27,8 +30,8 @@ import (
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy/dockerClient"
 	rancher1api "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy/rancher-api"
 	rancher2api "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy/rancher2-api"
-	"log"
-	"sync"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/verification"
+	permv2 "github.com/SENERGY-Platform/permissions-v2/pkg/client"
 )
 
 func Start(conf config.Config, ctx context.Context) (wg *sync.WaitGroup, err error) {
@@ -58,7 +61,14 @@ func Start(conf config.Config, ctx context.Context) (wg *sync.WaitGroup, err err
 		return wg, err
 	}
 
-	ctrl := controller.New(conf, data, deploymentClient)
+	permv2Client := permv2.New(conf.PermissionsV2Url)
+	verifier := verification.New(permv2Client)
+
+	ctrl, err := controller.New(conf, data, deploymentClient, verifier, permv2Client)
+	if err != nil {
+		log.Println("ERROR: unable to get controller", err)
+		return wg, err
+	}
 
 	if conf.StartupEnsureDeployed {
 		log.Println("Restoring missing import containers")
@@ -68,7 +78,7 @@ func Start(conf config.Config, ctx context.Context) (wg *sync.WaitGroup, err err
 		}
 	}
 
-	err = api.Start(conf, ctx, ctrl)
+	err = api.Start(conf, ctx, ctrl, permv2Client)
 	if err != nil {
 		log.Println("ERROR: unable to start api", err)
 		return wg, err

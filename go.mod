@@ -11,6 +11,7 @@ require (
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/satori/go.uuid v1.2.0
+	github.com/swaggo/swag v1.16.4
 	go.mongodb.org/mongo-driver v1.17.1
 )
 
@@ -49,7 +50,6 @@ require (
 	github.com/smartystreets/goconvey v1.8.1 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 	github.com/swaggo/http-swagger v1.3.4 // indirect
-	github.com/swaggo/swag v1.16.4 // indirect
 	github.com/urfave/cli/v2 v2.3.0 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect

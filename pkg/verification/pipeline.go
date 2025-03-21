@@ -18,17 +18,17 @@ package verification
 
 import (
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
-	"net/http"
-	"strconv"
 	"io"
 	"log"
+	"net/http"
+	"strconv"
 )
 
 type pipeline struct {
 	Id string `json:"id"`
 }
 
-func VerifyPipeline(id string, token string, userId string, config *config.Config) (bool, error) {
+func (*Verifier) VerifyPipeline(id string, token string, userId string, config *config.Config) (bool, error) {
 	req, err := http.NewRequest("GET", config.AnalyticsPipelineUrl+"/pipeline/"+id, nil)
 	if err != nil {
 		log.Println("Cant create request to get pipeline: ", err.Error())

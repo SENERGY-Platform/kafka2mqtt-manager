@@ -101,8 +101,8 @@ func (this *Mongo) instanceCollection() *mongo.Collection {
 	return this.client.Database(this.config.MongoTable).Collection(this.config.MongoImportTypeCollection)
 }
 
-func (this *Mongo) GetInstance(ctx context.Context, id string, owner string) (instance model.Instance, exists bool, err error) {
-	result := this.instanceCollection().FindOne(ctx, bson.M{ownerKey: owner, idKey: id})
+func (this *Mongo) GetInstance(ctx context.Context, id string) (instance model.Instance, exists bool, err error) {
+	result := this.instanceCollection().FindOne(ctx, bson.M{idKey: id})
 	err = result.Err()
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -117,7 +117,7 @@ func (this *Mongo) GetInstance(ctx context.Context, id string, owner string) (in
 	return instance, true, err
 }
 
-func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64, sort string, owner string, asc bool, search string, includeGenerated bool) (result []model.Instance, total int64, err error) {
+func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64, sort string, asc bool, search string, includeGenerated bool, ids []string) (result []model.Instance, err error) {
 	opt := options.Find()
 	opt.SetLimit(limit)
 	opt.SetSkip(offset)
@@ -170,44 +170,43 @@ func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64,
 				Pattern: ".*" + search + ".*",
 			}}
 	}
-	if owner != "" {
-		filter[ownerKey] = owner
+	if ids != nil {
+		filter[idKey] = bson.M{"$in": bson.A{ids}}
 	}
 	cursor, err := this.instanceCollection().Find(ctx, filter, opt)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	for cursor.Next(context.Background()) {
 		instance := model.Instance{}
 		err = cursor.Decode(&instance)
 		if err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		result = append(result, instance)
 	}
 	if cursor.Err() != nil {
-		return nil, 0, cursor.Err()
+		return nil, cursor.Err()
 	}
-	total, err = this.instanceCollection().CountDocuments(context.Background(), bson.M{ownerKey: owner})
 	return
 }
 
-func (this *Mongo) SetInstance(ctx context.Context, instance model.Instance, owner string) error {
-	_, err := this.instanceCollection().ReplaceOne(ctx, bson.M{ownerKey: owner, idKey: instance.Id}, instance, options.Replace().SetUpsert(true))
+func (this *Mongo) SetInstance(ctx context.Context, instance model.Instance) error {
+	_, err := this.instanceCollection().ReplaceOne(ctx, bson.M{idKey: instance.Id}, instance, options.Replace().SetUpsert(true))
 	if err != nil {
 		log.Println("Cant set instance to db: " + err.Error())
 	}
 	return err
 }
 
-func (this *Mongo) RemoveInstances(ctx context.Context, ids []string, owner string) error {
-	filter := bson.M{ownerKey: owner, idKey: bson.M{"$in": ids}}
+func (this *Mongo) RemoveInstances(ctx context.Context, ids []string) error {
+	filter := bson.M{idKey: bson.M{"$in": ids}}
 	_, err := this.instanceCollection().DeleteMany(ctx, filter)
 	return err
 }
 
-func (this *Mongo) GetInstances(ctx context.Context, ids []string, owner string) (result []model.Instance, allExist bool, err error) {
-	filter := bson.M{ownerKey: owner, idKey: bson.M{"$in": ids}}
+func (this *Mongo) GetInstances(ctx context.Context, ids []string) (result []model.Instance, allExist bool, err error) {
+	filter := bson.M{idKey: bson.M{"$in": ids}}
 	cursor, err := this.instanceCollection().Find(ctx, filter)
 	if err != nil {
 		return result, false, err

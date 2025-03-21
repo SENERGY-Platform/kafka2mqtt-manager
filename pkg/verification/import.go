@@ -21,7 +21,7 @@ import (
 	"net/http"
 )
 
-func VerifyImport(id string, token string, userId string, config *config.Config) (bool, error) {
+func (*Verifier) VerifyImport(id string, token string, userId string, config *config.Config) (bool, error) {
 	req, err := http.NewRequest("GET", config.ImportDeployUrl+"/instances/"+id, nil)
 	if err != nil {
 		return false, err

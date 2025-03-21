@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 InfAI (CC SES)
+ * Copyright 2025 InfAI (CC SES)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package verification
 
-import (
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
-	"github.com/SENERGY-Platform/permissions-v2/pkg/client"
-)
+import "github.com/SENERGY-Platform/permissions-v2/pkg/client"
 
-func (verifier *Verifier) VerifyDevice(id string, token string, config *config.Config) (bool, error) {
-	access, err, _ := verifier.permv2.CheckPermission(token, "devices", id, client.Read)
-	return access, err
+type Verifier struct {
+	permv2 client.Client
+}
+
+func New(permv2 client.Client) *Verifier {
+	return &Verifier{permv2: permv2}
 }

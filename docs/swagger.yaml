@@ -1,5 +1,34 @@
 basePath: /
 definitions:
+  model.AdminLoadPermSearchRequest:
+    properties:
+      dry_run:
+        description: true -> log changes without executing them
+        type: boolean
+      overwrite_existing:
+        description: false -> skip known elements; true -> force state of permission-search
+        type: boolean
+      permission_search_url:
+        type: string
+      token:
+        type: string
+      topic_id:
+        description: topic as used in permissions-v2
+        type: string
+    type: object
+  model.ComputedPermissions:
+    properties:
+      administrate:
+        type: boolean
+      execute:
+        type: boolean
+      id:
+        type: string
+      read:
+        type: boolean
+      write:
+        type: boolean
+    type: object
   model.Instance:
     properties:
       CreatedAt:
@@ -46,6 +75,67 @@ definitions:
     - Offset
     - ServiceName
     - Topic
+    type: object
+  model.PermissionsMap:
+    properties:
+      administrate:
+        type: boolean
+      execute:
+        type: boolean
+      read:
+        type: boolean
+      write:
+        type: boolean
+    type: object
+  model.Resource:
+    properties:
+      group_permissions:
+        additionalProperties:
+          $ref: '#/definitions/model.PermissionsMap'
+        type: object
+      id:
+        type: string
+      role_permissions:
+        additionalProperties:
+          $ref: '#/definitions/model.PermissionsMap'
+        type: object
+      topic_id:
+        type: string
+      user_permissions:
+        additionalProperties:
+          $ref: '#/definitions/model.PermissionsMap'
+        type: object
+    type: object
+  model.ResourcePermissions:
+    properties:
+      group_permissions:
+        additionalProperties:
+          $ref: '#/definitions/model.PermissionsMap'
+        type: object
+      role_permissions:
+        additionalProperties:
+          $ref: '#/definitions/model.PermissionsMap'
+        type: object
+      user_permissions:
+        additionalProperties:
+          $ref: '#/definitions/model.PermissionsMap'
+        type: object
+    type: object
+  model.Topic:
+    properties:
+      default_permissions:
+        $ref: '#/definitions/model.ResourcePermissions'
+      ensure_kafka_topic_init:
+        type: boolean
+      ensure_kafka_topic_init_partition_number:
+        type: integer
+      id:
+        type: string
+      last_update_unix_timestamp:
+        description: should be ignored by the user; is set by db
+        type: integer
+      publish_to_kafka_topic:
+        type: string
     type: object
   model.Value:
     properties:
@@ -231,6 +321,598 @@ paths:
       security:
       - Bearer: []
       summary: Get instance
+  /permissions/accessible/{topic}:
+    get:
+      description: list accessible resource ids
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: checked permissions in the form of 'rwxa', defaults to 'r'
+        in: query
+        name: permissions
+        type: string
+      - description: limits size of result; 0 means unlimited
+        in: query
+        name: limit
+        type: integer
+      - description: offset to be used in combination with limit
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: list accessible resource ids
+      tags:
+      - accessible
+      - resource
+  /permissions/admin/load/permission-search:
+    post:
+      consumes:
+      - application/json
+      description: load rights from permission-search, requesting user must have admin
+        right
+      parameters:
+      - description: load configuration
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.AdminLoadPermSearchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: update count
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: load rights from permission-search
+      tags:
+      - admin
+  /permissions/admin/resources/{topic}:
+    get:
+      description: lists resource ids in topic, requesting user must be in admin group
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: limits size of result; 0 means unlimited
+        in: query
+        name: limit
+        type: integer
+      - description: offset to be used in combination with limit
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: lists resource ids in topic
+      tags:
+      - topics
+      - resources
+      - admin
+  /permissions/admin/topics:
+    get:
+      description: lists topics with their configuration, requesting user must be
+        admin
+      parameters:
+      - description: limits size of result; 0 means unlimited
+        in: query
+        name: limit
+        type: integer
+      - description: offset to be used in combination with limit
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Topic'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: lists topics with their configuration
+      tags:
+      - topics
+    post:
+      consumes:
+      - application/json
+      description: set topic config, requesting user must be admin
+      parameters:
+      - description: Topic
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.Topic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Topic'
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/model.Topic'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: set topic config
+      tags:
+      - topics
+  /permissions/admin/topics/{id}:
+    delete:
+      description: remove topic config, requesting user must be admin
+      parameters:
+      - description: Topic Id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: remove topic config
+      tags:
+      - topics
+    get:
+      description: get topic config, requesting user must be admin
+      parameters:
+      - description: Topic Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Topic'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: get topic config
+      tags:
+      - topics
+    put:
+      consumes:
+      - application/json
+      description: set topic config, requesting user must be admin
+      parameters:
+      - description: Topic Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Topic
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.Topic'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Topic'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: set topic config
+      tags:
+      - topics
+  /permissions/check/{topic}:
+    get:
+      description: check multiple permissions
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: Resource Ids, comma seperated
+        in: query
+        name: ids
+        required: true
+        type: string
+      - description: checked permissions in the form of 'rwxa', defaults to 'r'
+        in: query
+        name: permissions
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: check multiple permissions
+      tags:
+      - check
+  /permissions/check/{topic}/{id}:
+    get:
+      description: check permission
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: Resource Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: checked permissions in the form of 'rwxa', defaults to 'r'
+        in: query
+        name: permissions
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: check permission
+      tags:
+      - check
+  /permissions/manage/{topic}:
+    get:
+      description: lists resources the user has admin rights to
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: limits size of result; 0 means unlimited
+        in: query
+        name: limit
+        type: integer
+      - description: offset to be used in combination with limit
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.Resource'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: lists resources the user has admin rights to
+      tags:
+      - manage
+      - resource
+  /permissions/manage/{topic}/{id}:
+    delete:
+      description: delete resource, requesting user must have admin right on the resource,
+        topic must have NoCqrs=true
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: Resource Id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Resource'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: delete resource
+      tags:
+      - manage
+      - resource
+    get:
+      description: get resource, requesting user must have admin right  on the resource
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: Resource Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Resource'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: get resource
+      tags:
+      - manage
+      - resource
+    put:
+      consumes:
+      - application/json
+      description: get resource rights, requesting user must have admin right
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: Resource Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: if set to true, the response will be sent after the corresponding
+          kafka done signal has been received
+        in: query
+        name: wait
+        type: boolean
+      - description: Topic
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/model.ResourcePermissions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ResourcePermissions'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: set resource rights
+      tags:
+      - manage
+      - resource-rights
+  /permissions/permissions/{topic}:
+    get:
+      description: list the computed permissions to resources of the given topic and
+        ids, group and user permissions are merged, unknown ids will get entries in
+        the result
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: Resource Ids, comma seperated
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ComputedPermissions'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: list the computed permissions to resources of the given topic and ids
+      tags:
+      - permissions
+      - check
+      - list
+  /permissions/query/permissions/{topic}:
+    post:
+      description: list the computed permissions to resources of the given topic and
+        ids, group and user permissions are merged, unknown ids will get entries in
+        the result
+      parameters:
+      - description: Topic Id
+        in: path
+        name: topic
+        required: true
+        type: string
+      - description: Resource Ids
+        in: body
+        name: ids
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/model.ComputedPermissions'
+            type: array
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - Bearer: []
+      summary: list the computed permissions to resources of the given topic and ids
+      tags:
+      - permissions
+      - check
+      - list
+      - query
 securityDefinitions:
   Bearer:
     description: Type "Bearer" followed by a space and JWT token.
