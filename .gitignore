@@ -3,3 +3,4 @@
 process-sync
 kafka2mqtt-manager
 .vscode
+__debug*

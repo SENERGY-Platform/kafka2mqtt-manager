@@ -19,13 +19,14 @@ package mongo
 import (
 	"context"
 	"errors"
+	"log"
+	"strings"
+
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"strings"
 )
 
 const idFieldName = "Id"
@@ -171,7 +172,7 @@ func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64,
 			}}
 	}
 	if ids != nil {
-		filter[idKey] = bson.M{"$in": bson.A{ids}}
+		filter[idKey] = bson.M{"$in": ids}
 	}
 	cursor, err := this.instanceCollection().Find(ctx, filter, opt)
 	if err != nil {
