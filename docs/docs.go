@@ -287,7 +287,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/permissions/accessible/{topic}": {
+        "/permissions/accessible/kafka2mqtt": {
             "get": {
                 "security": [
                     {
@@ -299,18 +299,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "accessible",
-                    "resource"
+                    "permissions-kafka2mqtt"
                 ],
                 "summary": "list accessible resource ids",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "checked permissions in the form of 'rwxa', defaults to 'r'",
@@ -352,382 +344,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/permissions/admin/load/permission-search": {
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "load rights from permission-search, requesting user must have admin right",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "load rights from permission-search",
-                "parameters": [
-                    {
-                        "description": "load configuration",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.AdminLoadPermSearchRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "update count",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/permissions/admin/resources/{topic}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "lists resource ids in topic, requesting user must be in admin group",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "topics",
-                    "resources",
-                    "admin"
-                ],
-                "summary": "lists resource ids in topic",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "limits size of result; 0 means unlimited",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "offset to be used in combination with limit",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/permissions/admin/topics": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "lists topics with their configuration, requesting user must be admin",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "topics"
-                ],
-                "summary": "lists topics with their configuration",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "limits size of result; 0 means unlimited",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "offset to be used in combination with limit",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/model.Topic"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "post": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "set topic config, requesting user must be admin",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "topics"
-                ],
-                "summary": "set topic config",
-                "parameters": [
-                    {
-                        "description": "Topic",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Topic"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Topic"
-                        }
-                    },
-                    "202": {
-                        "description": "Accepted",
-                        "schema": {
-                            "$ref": "#/definitions/model.Topic"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/permissions/admin/topics/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "get topic config, requesting user must be admin",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "topics"
-                ],
-                "summary": "get topic config",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Topic"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "set topic config, requesting user must be admin",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "topics"
-                ],
-                "summary": "set topic config",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Topic",
-                        "name": "message",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/model.Topic"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Topic"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "remove topic config, requesting user must be admin",
-                "tags": [
-                    "topics"
-                ],
-                "summary": "remove topic config",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
-            }
-        },
-        "/permissions/check/{topic}": {
+        "/permissions/check/kafka2mqtt": {
             "get": {
                 "security": [
                     {
@@ -739,17 +356,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "check"
+                    "permissions-kafka2mqtt"
                 ],
                 "summary": "check multiple permissions",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Resource Ids, comma seperated",
@@ -786,7 +396,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/permissions/check/{topic}/{id}": {
+        "/permissions/check/kafka2mqtt/{id}": {
             "get": {
                 "security": [
                     {
@@ -798,17 +408,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "check"
+                    "permissions-kafka2mqtt"
                 ],
                 "summary": "check permission",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Resource Id",
@@ -842,7 +445,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/permissions/manage/{topic}": {
+        "/permissions/manage/kafka2mqtt": {
             "get": {
                 "security": [
                     {
@@ -854,18 +457,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "manage",
-                    "resource"
+                    "permissions-kafka2mqtt"
                 ],
                 "summary": "lists resources the user has admin rights to",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "limits size of result; 0 means unlimited",
@@ -904,7 +499,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/permissions/manage/{topic}/{id}": {
+        "/permissions/manage/kafka2mqtt/{id}": {
             "get": {
                 "security": [
                     {
@@ -916,18 +511,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "manage",
-                    "resource"
+                    "permissions-kafka2mqtt"
                 ],
                 "summary": "get resource",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Resource Id",
@@ -971,18 +558,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "manage",
-                    "resource-rights"
+                    "permissions-kafka2mqtt"
                 ],
                 "summary": "set resource rights",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Resource Id",
@@ -1026,82 +605,24 @@ const docTemplate = `{
                         "description": "Internal Server Error"
                     }
                 }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "delete resource, requesting user must have admin right on the resource, topic must have NoCqrs=true",
-                "tags": [
-                    "manage",
-                    "resource"
-                ],
-                "summary": "delete resource",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Resource Id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/model.Resource"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request"
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "500": {
-                        "description": "Internal Server Error"
-                    }
-                }
             }
         },
-        "/permissions/permissions/{topic}": {
+        "/permissions/permissions/kafka2mqtt": {
             "get": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "list the computed permissions to resources of the given topic and ids, group and user permissions are merged, unknown ids will get entries in the result",
+                "description": "list the computed permissions to resources of the given topic (kafka2mqtt) and ids, group and user permissions are merged, unknown ids will get entries in the result",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "permissions",
-                    "check",
-                    "list"
+                    "permissions-kafka2mqtt"
                 ],
-                "summary": "list the computed permissions to resources of the given topic and ids",
+                "summary": "list the computed permissions to resources of the given topic (kafka2mqtt) and ids",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "string",
                         "description": "Resource Ids, comma seperated",
@@ -1132,32 +653,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/permissions/query/permissions/{topic}": {
+        "/permissions/query/permissions/kafka2mqtt": {
             "post": {
                 "security": [
                     {
                         "Bearer": []
                     }
                 ],
-                "description": "list the computed permissions to resources of the given topic and ids, group and user permissions are merged, unknown ids will get entries in the result",
+                "description": "list the computed permissions to resources of the given topic (kafka2mqtt) and ids, group and user permissions are merged, unknown ids will get entries in the result",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "permissions",
-                    "check",
-                    "list",
-                    "query"
+                    "permissions-kafka2mqtt"
                 ],
-                "summary": "list the computed permissions to resources of the given topic and ids",
+                "summary": "list the computed permissions to resources of the given topic (kafka2mqtt) and ids",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Topic Id",
-                        "name": "topic",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "description": "Resource Ids",
                         "name": "ids",
@@ -1195,29 +706,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "model.AdminLoadPermSearchRequest": {
-            "type": "object",
-            "properties": {
-                "dry_run": {
-                    "description": "true -\u003e log changes without executing them",
-                    "type": "boolean"
-                },
-                "overwrite_existing": {
-                    "description": "false -\u003e skip known elements; true -\u003e force state of permission-search",
-                    "type": "boolean"
-                },
-                "permission_search_url": {
-                    "type": "string"
-                },
-                "token": {
-                    "type": "string"
-                },
-                "topic_id": {
-                    "description": "topic as used in permissions-v2",
-                    "type": "string"
-                }
-            }
-        },
         "model.ComputedPermissions": {
             "type": "object",
             "properties": {
@@ -1372,30 +860,6 @@ const docTemplate = `{
                     "additionalProperties": {
                         "$ref": "#/definitions/model.PermissionsMap"
                     }
-                }
-            }
-        },
-        "model.Topic": {
-            "type": "object",
-            "properties": {
-                "default_permissions": {
-                    "$ref": "#/definitions/model.ResourcePermissions"
-                },
-                "ensure_kafka_topic_init": {
-                    "type": "boolean"
-                },
-                "ensure_kafka_topic_init_partition_number": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "last_update_unix_timestamp": {
-                    "description": "should be ignored by the user; is set by db",
-                    "type": "integer"
-                },
-                "publish_to_kafka_topic": {
-                    "type": "string"
                 }
             }
         },

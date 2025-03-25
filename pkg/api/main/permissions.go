@@ -16,7 +16,11 @@
 
 package main
 
-import "github.com/SENERGY-Platform/permissions-v2/pkg/client"
+import (
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/api"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/controller"
+	"github.com/SENERGY-Platform/permissions-v2/pkg/client"
+)
 
 //go:generate go run permissions.go
 //go:generate go tool swag init -o ../../../docs --parseDependency -d .. -g api.go
@@ -25,7 +29,13 @@ import "github.com/SENERGY-Platform/permissions-v2/pkg/client"
 // which enables swag init to generate documentation for permissions endpoints
 // which are added by 'permForward := client.New(config.PermissionsV2Url).EmbedPermissionsRequestForwarding("/permissions/", router)'
 func main() {
-	err := client.GenerateGoFileWithSwaggoCommentsForEmbededPermissionsClient("api", "permissions", "../generated_permissions.go")
+	err := client.GenerateGoFileWithSwaggoCommentsForEmbeddedPermissionsClient(
+		"api",
+		"permissions",
+		"../generated_permissions.go",
+		[]string{controller.Permv2topic},
+		api.ForwardPermissions,
+	)
 	if err != nil {
 		panic(err)
 	}

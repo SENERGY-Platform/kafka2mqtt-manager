@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/api/util"
@@ -32,10 +33,26 @@ import (
 
 var endpoints []func(config config.Config, control Controller, router *httprouter.Router)
 
+func ForwardPermissions(method string, path string) bool {
+	if method == http.MethodDelete {
+		return false
+	}
+	if strings.Contains(path, "import") {
+		return false
+	}
+	if strings.Contains(path, "export") {
+		return false
+	}
+	if strings.Contains(path, "admin") {
+		return false
+	}
+	return true
+}
+
 func Start(config config.Config, ctx context.Context, control Controller, permv2 client.Client) (err error) {
 	log.Println("start api on " + config.ApiPort)
 	router := Router(config, control)
-	router = client.EmbedPermissionsClientIntoRouter(permv2, router, "/permissions/")
+	router = client.EmbedPermissionsClientIntoRouter(permv2, router, "/permissions/", ForwardPermissions)
 	handler := util.NewLogger(util.NewCors(router))
 	server := &http.Server{Addr: ":" + config.ApiPort, Handler: handler, WriteTimeout: 10 * time.Second, ReadTimeout: 2 * time.Second, ReadHeaderTimeout: 2 * time.Second}
 	go func() {

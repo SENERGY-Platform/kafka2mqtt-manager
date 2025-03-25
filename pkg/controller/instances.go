@@ -40,7 +40,7 @@ const filterImport = "import_id"
 const filterOperator = "operatorId"
 
 func (this *Controller) ListInstances(token string, limit int64, offset int64, sort string, asc bool, search string, includeGenerated bool) (results []model.Instance, total int, err error, errCode int) {
-	ids, err, errCode := this.permv2.ListAccessibleResourceIds(token, permv2topic, permv2.ListOptions{}, permv2.Read)
+	ids, err, errCode := this.permv2.ListAccessibleResourceIds(token, Permv2topic, permv2.ListOptions{}, permv2.Read)
 	if err != nil {
 		return nil, 0, err, errCode
 	}
@@ -53,7 +53,7 @@ func (this *Controller) ListInstances(token string, limit int64, offset int64, s
 }
 
 func (this *Controller) ReadInstance(token string, id string) (result model.Instance, err error, errCode int) {
-	ok, err, errCode := this.permv2.CheckPermission(token, permv2topic, id, permv2.Read)
+	ok, err, errCode := this.permv2.CheckPermission(token, Permv2topic, id, permv2.Read)
 	if err != nil {
 		return result, err, errCode
 	}
@@ -101,7 +101,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
-	this.permv2.SetPermission(token, permv2topic, id, permv2.ResourcePermissions{
+	this.permv2.SetPermission(token, Permv2topic, id, permv2.ResourcePermissions{
 		UserPermissions: map[string]permv2.PermissionsMap{
 			instance.UserId: {
 				Read:         true,
@@ -123,7 +123,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 }
 
 func (this *Controller) SetInstance(instance model.Instance, userId string, token string) (err error, code int) {
-	ok, err, errCode := this.permv2.CheckPermission(token, permv2topic, instance.Id, permv2.Write)
+	ok, err, errCode := this.permv2.CheckPermission(token, Permv2topic, instance.Id, permv2.Write)
 	if err != nil {
 		return err, errCode
 	}
@@ -166,7 +166,7 @@ func (this *Controller) SetInstance(instance model.Instance, userId string, toke
 }
 
 func (this *Controller) DeleteInstances(token string, ids []string) (err error, errCode int) {
-	access, err, errCode := this.permv2.CheckMultiplePermissions(token, permv2topic, ids, permv2.Administrate)
+	access, err, errCode := this.permv2.CheckMultiplePermissions(token, Permv2topic, ids, permv2.Administrate)
 	if err != nil {
 		return err, errCode
 	}
@@ -193,7 +193,7 @@ func (this *Controller) DeleteInstances(token string, ids []string) (err error, 
 		if err != nil {
 			return err, http.StatusInternalServerError
 		}
-		this.permv2.RemoveResource(token, permv2topic, instances[i].Id)
+		this.permv2.RemoveResource(token, Permv2topic, instances[i].Id)
 	}
 
 	return nil, http.StatusNoContent

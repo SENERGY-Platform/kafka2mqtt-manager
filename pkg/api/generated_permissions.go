@@ -23,95 +23,11 @@ package api
 
 
 
-// GeneratedAdminListResourceIds godoc
-// @Summary      lists resource ids in topic
-// @Description  lists resource ids in topic, requesting user must be in admin group
-// @Tags         topics, resources, admin
-// @Security Bearer
-// @Param        topic path string true "Topic Id"
-// @Param        limit query integer false "limits size of result; 0 means unlimited"
-// @Param        offset query integer false "offset to be used in combination with limit"
-// @Produce      json
-// @Success      200 {array}  string
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      500
-// @Router       /permissions/admin/resources/{topic} [get]
-func GeneratedAdminListResourceIds(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedAdminLoadFromPermissionSearch godoc
-// @Summary      load rights from permission-search
-// @Description  load rights from permission-search, requesting user must have admin right
-// @Tags         admin
-// @Security Bearer
-// @Param        message body model.AdminLoadPermSearchRequest true "load configuration"
-// @Accept       json
-// @Produce      json
-// @Success      200 {object}  integer "update count"
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      500
-// @Router       /permissions/admin/load/permission-search [post]
-func GeneratedAdminLoadFromPermissionSearch(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedListComputedPermissions godoc
-// @Summary      list the computed permissions to resources of the given topic and ids
-// @Description  list the computed permissions to resources of the given topic and ids, group and user permissions are merged, unknown ids will get entries in the result
-// @Tags         permissions, check, list
-// @Security Bearer
-// @Param        topic path string true "Topic Id"
-// @Param        ids query string true "Resource Ids, comma seperated"
-// @Produce      json
-// @Success      200 {array} model.ComputedPermissions
-// @Failure      400
-// @Failure      401
-// @Failure      500
-// @Router       /permissions/permissions/{topic} [get]
-func GeneratedListComputedPermissions(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedQueryListComputedPermissions godoc
-// @Summary      list the computed permissions to resources of the given topic and ids
-// @Description  list the computed permissions to resources of the given topic and ids, group and user permissions are merged, unknown ids will get entries in the result
-// @Tags         permissions, check, list, query
-// @Security Bearer
-// @Param        topic path string true "Topic Id"
-// @Param        ids body []string true "Resource Ids"
-// @Produce      json
-// @Success      200 {array} model.ComputedPermissions
-// @Failure      400
-// @Failure      401
-// @Failure      500
-// @Router       /permissions/query/permissions/{topic} [post]
-func GeneratedQueryListComputedPermissions(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedCheckPermission godoc
+// GeneratedCheckPermission_kafka2mqtt godoc
 // @Summary      check permission
 // @Description  check permission
-// @Tags         check
+// @Tags         permissions-kafka2mqtt
 // @Security Bearer
-// @Param        topic path string true "Topic Id"
 // @Param        id path string true "Resource Id"
 // @Param        permissions query string false "checked permissions in the form of 'rwxa', defaults to 'r'"
 // @Produce      json
@@ -119,20 +35,19 @@ func GeneratedQueryListComputedPermissions(){
 // @Failure      400
 // @Failure      401
 // @Failure      500
-// @Router       /permissions/check/{topic}/{id} [get]
-func GeneratedCheckPermission(){
+// @Router       /permissions/check/kafka2mqtt/{id} [get]
+func GeneratedCheckPermission_kafka2mqtt(){
 	//this method is only used as anchor for swagger documentation
 	panic("this method is only used as anchor for swagger documentation")
 }
 
 
 
-// GeneratedCheckMultiplePermissions godoc
+// GeneratedCheckMultiplePermissions_kafka2mqtt godoc
 // @Summary      check multiple permissions
 // @Description  check multiple permissions
-// @Tags         check
+// @Tags         permissions-kafka2mqtt
 // @Security Bearer
-// @Param        topic path string true "Topic Id"
 // @Param        ids query string true "Resource Ids, comma seperated"
 // @Param        permissions query string false "checked permissions in the form of 'rwxa', defaults to 'r'"
 // @Produce      json
@@ -140,20 +55,19 @@ func GeneratedCheckPermission(){
 // @Failure      400
 // @Failure      401
 // @Failure      500
-// @Router       /permissions/check/{topic} [get]
-func GeneratedCheckMultiplePermissions(){
+// @Router       /permissions/check/kafka2mqtt [get]
+func GeneratedCheckMultiplePermissions_kafka2mqtt(){
 	//this method is only used as anchor for swagger documentation
 	panic("this method is only used as anchor for swagger documentation")
 }
 
 
 
-// GeneratedListAccessibleResourceIds godoc
+// GeneratedListAccessibleResourceIds_kafka2mqtt godoc
 // @Summary      list accessible resource ids
 // @Description  list accessible resource ids
-// @Tags         accessible, resource
+// @Tags         permissions-kafka2mqtt
 // @Security Bearer
-// @Param        topic path string true "Topic Id"
 // @Param        permissions query string false "checked permissions in the form of 'rwxa', defaults to 'r'"
 // @Param        limit query integer false "limits size of result; 0 means unlimited"
 // @Param        offset query integer false "offset to be used in combination with limit"
@@ -162,20 +76,57 @@ func GeneratedCheckMultiplePermissions(){
 // @Failure      400
 // @Failure      401
 // @Failure      500
-// @Router       /permissions/accessible/{topic} [get]
-func GeneratedListAccessibleResourceIds(){
+// @Router       /permissions/accessible/kafka2mqtt [get]
+func GeneratedListAccessibleResourceIds_kafka2mqtt(){
 	//this method is only used as anchor for swagger documentation
 	panic("this method is only used as anchor for swagger documentation")
 }
 
 
 
-// GeneratedListResourcesWithAdminPermission godoc
+// GeneratedListComputedPermissions_kafka2mqtt godoc
+// @Summary      list the computed permissions to resources of the given topic (kafka2mqtt) and ids
+// @Description  list the computed permissions to resources of the given topic (kafka2mqtt) and ids, group and user permissions are merged, unknown ids will get entries in the result
+// @Tags         permissions-kafka2mqtt
+// @Security Bearer
+// @Param        ids query string true "Resource Ids, comma seperated"
+// @Produce      json
+// @Success      200 {array} model.ComputedPermissions
+// @Failure      400
+// @Failure      401
+// @Failure      500
+// @Router       /permissions/permissions/kafka2mqtt [get]
+func GeneratedListComputedPermissions_kafka2mqtt(){
+	//this method is only used as anchor for swagger documentation
+	panic("this method is only used as anchor for swagger documentation")
+}
+
+
+
+// GeneratedQueryListComputedPermissions_kafka2mqtt godoc
+// @Summary      list the computed permissions to resources of the given topic (kafka2mqtt) and ids
+// @Description  list the computed permissions to resources of the given topic (kafka2mqtt) and ids, group and user permissions are merged, unknown ids will get entries in the result
+// @Tags         permissions-kafka2mqtt
+// @Security Bearer
+// @Param        ids body []string true "Resource Ids"
+// @Produce      json
+// @Success      200 {array} model.ComputedPermissions
+// @Failure      400
+// @Failure      401
+// @Failure      500
+// @Router       /permissions/query/permissions/kafka2mqtt [post]
+func GeneratedQueryListComputedPermissions_kafka2mqtt(){
+	//this method is only used as anchor for swagger documentation
+	panic("this method is only used as anchor for swagger documentation")
+}
+
+
+
+// GeneratedListResourcesWithAdminPermission_kafka2mqtt godoc
 // @Summary      lists resources the user has admin rights to
 // @Description  lists resources the user has admin rights to
-// @Tags         manage, resource
+// @Tags         permissions-kafka2mqtt
 // @Security Bearer
-// @Param        topic path string true "Topic Id"
 // @Param        limit query integer false "limits size of result; 0 means unlimited"
 // @Param        offset query integer false "offset to be used in combination with limit"
 // @Produce      json
@@ -184,20 +135,19 @@ func GeneratedListAccessibleResourceIds(){
 // @Failure      401
 // @Failure      403
 // @Failure      500
-// @Router       /permissions/manage/{topic} [get]
-func GeneratedListResourcesWithAdminPermission(){
+// @Router       /permissions/manage/kafka2mqtt [get]
+func GeneratedListResourcesWithAdminPermission_kafka2mqtt(){
 	//this method is only used as anchor for swagger documentation
 	panic("this method is only used as anchor for swagger documentation")
 }
 
 
 
-// GeneratedGetResource godoc
+// GeneratedGetResource_kafka2mqtt godoc
 // @Summary      get resource
 // @Description  get resource, requesting user must have admin right  on the resource
-// @Tags         manage, resource
+// @Tags         permissions-kafka2mqtt
 // @Security Bearer
-// @Param        topic path string true "Topic Id"
 // @Param        id path string true "Resource Id"
 // @Produce      json
 // @Success      200 {object}  model.Resource
@@ -205,40 +155,19 @@ func GeneratedListResourcesWithAdminPermission(){
 // @Failure      401
 // @Failure      403
 // @Failure      500
-// @Router       /permissions/manage/{topic}/{id} [get]
-func GeneratedGetResource(){
+// @Router       /permissions/manage/kafka2mqtt/{id} [get]
+func GeneratedGetResource_kafka2mqtt(){
 	//this method is only used as anchor for swagger documentation
 	panic("this method is only used as anchor for swagger documentation")
 }
 
 
 
-// GeneratedDeleteResource godoc
-// @Summary      delete resource
-// @Description  delete resource, requesting user must have admin right on the resource, topic must have NoCqrs=true
-// @Tags         manage, resource
-// @Security Bearer
-// @Param        topic path string true "Topic Id"
-// @Param        id path string true "Resource Id"
-// @Success      200 {object}  model.Resource
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      500
-// @Router       /permissions/manage/{topic}/{id} [delete]
-func GeneratedDeleteResource(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedSetPermission godoc
+// GeneratedSetPermission_kafka2mqtt godoc
 // @Summary      set resource rights
 // @Description  get resource rights, requesting user must have admin right
-// @Tags         manage, resource-rights
+// @Tags         permissions-kafka2mqtt
 // @Security Bearer
-// @Param        topic path string true "Topic Id"
 // @Param        id path string true "Resource Id"
 // @Param        wait query bool false "if set to true, the response will be sent after the corresponding kafka done signal has been received"
 // @Param        message body model.ResourcePermissions true "Topic"
@@ -249,116 +178,8 @@ func GeneratedDeleteResource(){
 // @Failure      401
 // @Failure      403
 // @Failure      500
-// @Router       /permissions/manage/{topic}/{id} [put]
-func GeneratedSetPermission(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedListTopics godoc
-// @Summary      lists topics with their configuration
-// @Description  lists topics with their configuration, requesting user must be admin
-// @Tags         topics
-// @Security Bearer
-// @Param        limit query integer false "limits size of result; 0 means unlimited"
-// @Param        offset query integer false "offset to be used in combination with limit"
-// @Produce      json
-// @Success      200 {array}  model.Topic
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      500
-// @Router       /permissions/admin/topics [get]
-func GeneratedListTopics(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedGetTopic godoc
-// @Summary      get topic config
-// @Description  get topic config, requesting user must be admin
-// @Tags         topics
-// @Security Bearer
-// @Param        id path string true "Topic Id"
-// @Produce      json
-// @Success      200 {object}  model.Topic
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      404
-// @Failure      500
-// @Router       /permissions/admin/topics/{id} [get]
-func GeneratedGetTopic(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedSetTopic godoc
-// @Summary      set topic config
-// @Description  set topic config, requesting user must be admin
-// @Tags         topics
-// @Accept       json
-// @Produce      json
-// @Security Bearer
-// @Param        id path string true "Topic Id"
-// @Param        message body model.Topic true "Topic"
-// @Success      200 {object}  model.Topic
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      404
-// @Failure      500
-// @Router       /permissions/admin/topics/{id} [put]
-func GeneratedSetTopic(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedSetTopicByPost godoc
-// @Summary      set topic config
-// @Description  set topic config, requesting user must be admin
-// @Tags         topics
-// @Accept       json
-// @Produce      json
-// @Security Bearer
-// @Param        message body model.Topic true "Topic"
-// @Success      200 {object}  model.Topic
-// @Success      202 {object}  model.Topic
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      404
-// @Failure      500
-// @Router       /permissions/admin/topics [POST]
-func GeneratedSetTopicByPost(){
-	//this method is only used as anchor for swagger documentation
-	panic("this method is only used as anchor for swagger documentation")
-}
-
-
-
-// GeneratedDeleteTopic godoc
-// @Summary      remove topic config
-// @Description  remove topic config, requesting user must be admin
-// @Tags         topics
-// @Security Bearer
-// @Param        id path string true "Topic Id"
-// @Success      200
-// @Failure      400
-// @Failure      401
-// @Failure      403
-// @Failure      404
-// @Failure      500
-// @Router       /permissions/admin/topics/{id} [delete]
-func GeneratedDeleteTopic(){
+// @Router       /permissions/manage/kafka2mqtt/{id} [put]
+func GeneratedSetPermission_kafka2mqtt(){
 	//this method is only used as anchor for swagger documentation
 	panic("this method is only used as anchor for swagger documentation")
 }

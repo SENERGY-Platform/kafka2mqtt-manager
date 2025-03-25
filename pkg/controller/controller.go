@@ -36,7 +36,7 @@ type Controller struct {
 	permv2           permv2.Client
 }
 
-const permv2topic = "kafka2mqtt"
+const Permv2topic = "kafka2mqtt"
 
 func New(config config.Config, db Database, deploymentClient DeploymentClient, verifier *verification.Verifier, permv2 permv2.Client) (*Controller, error) {
 	controller := &Controller{
@@ -56,7 +56,7 @@ func New(config config.Config, db Database, deploymentClient DeploymentClient, v
 
 func (c *Controller) migrate() error {
 	_, err, _ := c.permv2.SetTopic(permv2.InternalAdminToken, permv2.Topic{
-		Id: permv2topic,
+		Id: Permv2topic,
 		DefaultPermissions: model.ResourcePermissions{
 			RolePermissions: map[string]model.PermissionsMap{
 				"admin": {
@@ -83,10 +83,10 @@ func (c *Controller) migrate() error {
 		offset += int64(len(instances))
 		for _, instance := range instances {
 			dbInstanceIds = append(dbInstanceIds, instance.Id)
-			_, err, code := c.permv2.GetResource(permv2.InternalAdminToken, permv2topic, instance.Id)
+			_, err, code := c.permv2.GetResource(permv2.InternalAdminToken, Permv2topic, instance.Id)
 			if err != nil {
 				if code == http.StatusNotFound {
-					_, err, _ = c.permv2.SetPermission(permv2.InternalAdminToken, permv2topic, instance.Id, model.ResourcePermissions{
+					_, err, _ = c.permv2.SetPermission(permv2.InternalAdminToken, Permv2topic, instance.Id, model.ResourcePermissions{
 						UserPermissions: map[string]model.PermissionsMap{
 							instance.UserId: {
 								Read:         true,
@@ -116,7 +116,7 @@ func (c *Controller) migrate() error {
 			break // done
 		}
 	}
-	permv2Ids, err, _ := c.permv2.AdminListResourceIds(permv2.InternalAdminToken, permv2topic, model.ListOptions{})
+	permv2Ids, err, _ := c.permv2.AdminListResourceIds(permv2.InternalAdminToken, Permv2topic, model.ListOptions{})
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (c *Controller) migrate() error {
 	for _, permv2Id := range permv2Ids {
 		_, ok := slices.BinarySearch(dbInstanceIds, permv2Id)
 		if !ok {
-			err, _ = c.permv2.RemoveResource(permv2.InternalAdminToken, permv2topic, permv2Id)
+			err, _ = c.permv2.RemoveResource(permv2.InternalAdminToken, Permv2topic, permv2Id)
 			if err != nil {
 				return err
 			}

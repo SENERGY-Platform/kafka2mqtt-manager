@@ -13,6 +13,8 @@ github.com/SENERGY-Platform/developer-notifications v0.0.4 h1:SmblhfWavNhE1mDxzr
 github.com/SENERGY-Platform/developer-notifications v0.0.4/go.mod h1:8yJrYnAYMtPEPy89ULw8ivgG8orVhSnaLgyfDt0bdgg=
 github.com/SENERGY-Platform/permissions-v2 v0.0.31 h1:hhY3wetmuCvkYqkZmTsU6xd9oa90IEsGfdY5DHAGawg=
 github.com/SENERGY-Platform/permissions-v2 v0.0.31/go.mod h1:AvaBgIMYADHvbeHhwT9marWxWiCEwNInpKytEYrSGr0=
+github.com/SENERGY-Platform/permissions-v2 v0.0.33 h1:Oac8Yz4USO52k9BucahUOqcFlFC3cOnOv8umQWW5B6U=
+github.com/SENERGY-Platform/permissions-v2 v0.0.33/go.mod h1:AvaBgIMYADHvbeHhwT9marWxWiCEwNInpKytEYrSGr0=
 github.com/SENERGY-Platform/service-commons v0.0.0-20250123095636-6dfc659ee43e h1:JyCPmb5tYkGlET39UG23MMw+CNNKHqoXdYL2oC3ChiI=
 github.com/SENERGY-Platform/service-commons v0.0.0-20250123095636-6dfc659ee43e/go.mod h1:1p2CQPNtler5leXqNgaOfr7DlgZUydrQlQYA97ycm4k=
 github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874 h1:N7oVaKyGp8bttX0bfZGmcGkjz7DLQXhAn3DNd3T0ous=

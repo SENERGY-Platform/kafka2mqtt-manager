@@ -5,7 +5,7 @@ go 1.24
 toolchain go1.24.1
 
 require (
-	github.com/SENERGY-Platform/permissions-v2 v0.0.31
+	github.com/SENERGY-Platform/permissions-v2 v0.0.33
 	github.com/docker/docker v25.0.4+incompatible
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/julienschmidt/httprouter v1.3.0
