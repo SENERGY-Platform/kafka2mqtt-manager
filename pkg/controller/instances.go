@@ -102,7 +102,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
-	_, err, _ = this.permv2.SetPermission(client.InternalAdminToken, Permv2topic, id, permv2.ResourcePermissions{
+	_, err, _ = this.permv2.SetPermission(client.InternalAdminToken, Permv2topic, instance.Id, permv2.ResourcePermissions{
 		UserPermissions: map[string]permv2.PermissionsMap{
 			instance.UserId: {
 				Read:         true,
