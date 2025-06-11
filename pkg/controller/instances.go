@@ -19,6 +19,7 @@ package controller
 import (
 	"errors"
 	"fmt"
+	"github.com/SENERGY-Platform/permissions-v2/pkg/client"
 
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/util"
@@ -101,7 +102,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 	if err != nil {
 		return result, err, http.StatusInternalServerError
 	}
-	this.permv2.SetPermission(token, Permv2topic, id, permv2.ResourcePermissions{
+	_, err, _ = this.permv2.SetPermission(client.InternalAdminToken, Permv2topic, id, permv2.ResourcePermissions{
 		UserPermissions: map[string]permv2.PermissionsMap{
 			instance.UserId: {
 				Read:         true,
@@ -119,6 +120,9 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 			},
 		},
 	})
+	if err != nil {
+		return result, err, http.StatusInternalServerError
+	}
 	return instance, nil, http.StatusOK
 }
 
