@@ -197,7 +197,10 @@ func (this *Controller) DeleteInstances(token string, ids []string) (err error, 
 		if err != nil {
 			return err, http.StatusInternalServerError
 		}
-		this.permv2.RemoveResource(token, Permv2topic, instances[i].Id)
+		err, _ = this.permv2.RemoveResource(client.InternalAdminToken, Permv2topic, instances[i].Id)
+		if err != nil {
+			return err, http.StatusInternalServerError
+		}
 	}
 
 	return nil, http.StatusNoContent
