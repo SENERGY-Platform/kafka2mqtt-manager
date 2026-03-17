@@ -17,14 +17,16 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 
 	_ "github.com/SENERGY-Platform/kafka2mqtt-manager/docs"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
 
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 	"github.com/swaggo/swag"
 )
 
@@ -33,16 +35,15 @@ func init() {
 }
 
 //go:generate go tool swag init -o ../../docs --parseDependency -d .. -g api/api.go
-func DocEndpoint(config config.Config, control Controller, router *httprouter.Router) {
-	router.GET("/doc", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
+func DocEndpoint(config config.Config, control Controller, router *gin.Engine) {
+	router.GET("/doc", func(c *gin.Context) {
 		doc, err := swag.ReadDoc()
 		if err != nil {
-			http.Error(writer, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			_ = c.Error(errors.Join(err, model.ErrInternalServerError))
 			return
 		}
 		//remove empty host to enable developer-swagger-api service to replace it; can not use cleaner delete on json object, because developer-swagger-api is sensible to formatting; better alternative is refactoring of developer-swagger-api/apis/db/db.py
 		doc = strings.Replace(doc, `"host": "",`, "", 1)
-		_, _ = writer.Write([]byte(doc))
+		c.Data(http.StatusOK, "application/json; charset=utf-8", []byte(doc))
 	})
 }

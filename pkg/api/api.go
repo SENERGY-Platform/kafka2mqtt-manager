@@ -24,15 +24,18 @@ import (
 	"strings"
 	"time"
 
+	gin_mw "github.com/SENERGY-Platform/gin-middleware"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/api/util"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
+
 	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 	"github.com/SENERGY-Platform/permissions-v2/pkg/client"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-contrib/requestid"
+	"github.com/gin-gonic/gin"
 )
 
-var endpoints []func(config config.Config, control Controller, router *httprouter.Router)
+var endpoints []func(config config.Config, control Controller, router *gin.Engine)
 
 func ForwardPermissions(method string, path string) bool {
 	if method == http.MethodDelete {
@@ -54,8 +57,7 @@ func Start(config config.Config, ctx context.Context, control Controller, permv2
 	_log.Logger.Info("start api", "port", config.ApiPort)
 	router := Router(config, control)
 	router = client.EmbedPermissionsClientIntoRouter(permv2, router, "/permissions/", ForwardPermissions)
-	handler := util.NewLogger(util.NewCors(router))
-	server := &http.Server{Addr: ":" + config.ApiPort, Handler: handler, WriteTimeout: 10 * time.Second, ReadTimeout: 2 * time.Second, ReadHeaderTimeout: 2 * time.Second}
+	server := &http.Server{Addr: ":" + config.ApiPort, Handler: router, WriteTimeout: 10 * time.Second, ReadTimeout: 2 * time.Second, ReadHeaderTimeout: 2 * time.Second}
 	go func() {
 		_log.Logger.Info("api listening", "addr", server.Addr)
 		if err := server.ListenAndServe(); err != http.ErrServerClosed {
@@ -88,14 +90,25 @@ func Start(config config.Config, ctx context.Context, control Controller, permv2
 // @name Authorization
 // @description Type "Bearer" followed by a space and JWT token.
 func Router(config config.Config, control Controller) http.Handler {
-	router := httprouter.New()
-	_log.Logger.Debug("add heartbeat endpoint")
-	router.GET("/", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		writer.WriteHeader(http.StatusOK)
-	})
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
+	router.Use(
+		gin_mw.StructLoggerHandlerWithDefaultGenerators(
+			_log.Logger.With(attributes.LogRecordTypeKey, attributes.HttpAccessLogRecordTypeVal),
+			attributes.Provider,
+			[]string{},
+			nil,
+		),
+		requestid.New(requestid.WithCustomHeaderStrKey("X-Request-ID")),
+		gin_mw.ErrorHandler(model.GetStatusCode, ", "),
+		gin_mw.StructRecoveryHandler(_log.Logger, gin_mw.DefaultRecoveryFunc),
+	)
 	for _, e := range endpoints {
-		_log.Logger.Debug("add endpoint", "name", runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
+		_log.Logger.Info("add endpoint", "name", runtime.FuncForPC(reflect.ValueOf(e).Pointer()).Name())
 		e(config, control, router)
 	}
+	router.GET("/", func(ctx *gin.Context) {
+		ctx.Status(http.StatusOK)
+	})
 	return router
 }

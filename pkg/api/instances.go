@@ -17,8 +17,7 @@
 package api
 
 import (
-	"encoding/json"
-	"io"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
@@ -27,7 +26,7 @@ import (
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
 	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -133,72 +132,60 @@ func DeleteInstance() {} // for doc generation
 // @Router       /instances [DELETE]
 func DeleteInstances() {} // for doc generation
 
-func DeploymentEndpoints(config config.Config, control Controller, router *httprouter.Router) {
+func DeploymentEndpoints(config config.Config, control Controller, router *gin.Engine) {
 	resource := "/instances"
 
-	router.POST(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	router.POST(resource, func(c *gin.Context) {
 		instance := model.Instance{}
-		err := json.NewDecoder(request.Body).Decode(&instance)
+		err := c.ShouldBind(&instance)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			_ = c.Error(errors.Join(err, model.GetError(http.StatusBadRequest)))
 			_log.Logger.Error("unable to decode instance request", attributes.ErrorKey, err)
-			if config.Debug {
-				b, _ := io.ReadAll(request.Body)
-				_log.Logger.Debug("instance request payload", "payload", string(b))
-			}
 			return
 		}
-		result, err, code := control.CreateInstance(instance, getUserId(request), request.Header.Get(authHeader))
+		result, err, code := control.CreateInstance(instance, getUserId(c), c.GetHeader(authHeader))
 		if err != nil {
-			http.Error(writer, err.Error(), code)
+			_ = c.Error(errors.Join(err, model.GetError(code)))
 			_log.Logger.Error("can't create instance", attributes.ErrorKey, err)
 			return
 		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		writer.WriteHeader(code)
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			_log.Logger.Error("unable to encode response", attributes.ErrorKey, err)
-			return
-		}
-		return
+		c.JSON(code, result)
 	})
 
-	router.GET(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		limit := request.URL.Query().Get("limit")
+	router.GET(resource, func(c *gin.Context) {
+		limit := c.Query("limit")
 		if limit == "" {
 			limit = "100"
 		}
 		limitInt, err := strconv.ParseInt(limit, 10, 64)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			_ = c.Error(errors.Join(err, model.GetError(http.StatusBadRequest)))
 			return
 		}
-		offset := request.URL.Query().Get("offset")
+		offset := c.Query("offset")
 		if offset == "" {
 			offset = "0"
 		}
 		offsetInt, err := strconv.ParseInt(offset, 10, 64)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			_ = c.Error(errors.Join(err, model.GetError(http.StatusBadRequest)))
 			return
 		}
-		sort := request.URL.Query().Get("order")
+		sort := c.Query("order")
 		if sort == "" {
 			sort = "name"
 		}
 		orderBy := strings.Split(sort, ":")[0]
 		asc := !strings.HasSuffix(sort, ":desc")
 
-		search := request.URL.Query().Get("search")
+		search := c.Query("search")
 
-		includeGenerated := strings.ToLower(request.URL.Query().Get("generated")) != "false"
-		results, total, err, errCode := control.ListInstances(request.Header.Get(authHeader), limitInt, offsetInt, orderBy, asc, search, includeGenerated)
+		includeGenerated := strings.ToLower(c.Query("generated")) != "false"
+		results, total, err, errCode := control.ListInstances(c.GetHeader(authHeader), limitInt, offsetInt, orderBy, asc, search, includeGenerated)
 		if err != nil {
-			http.Error(writer, err.Error(), errCode)
+			_ = c.Error(errors.Join(err, model.GetError(errCode)))
 			return
 		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		r := instanceList{
 			Instances: results,
 			Count:     len(results),
@@ -207,81 +194,69 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 		if results == nil {
 			r.Instances = []model.Instance{}
 		}
-		err = json.NewEncoder(writer).Encode(r)
-		if err != nil {
-			_log.Logger.Error("unable to encode response", attributes.ErrorKey, err)
-		}
-		return
+		c.JSON(http.StatusOK, r)
 	})
 
-	router.GET(resource+"/:id", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		id := params.ByName("id")
-		result, err, errCode := control.ReadInstance(request.Header.Get(authHeader), id)
+	router.GET(resource+"/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		result, err, errCode := control.ReadInstance(c.GetHeader(authHeader), id)
 		if err != nil {
-			http.Error(writer, err.Error(), errCode)
+			_ = c.Error(errors.Join(err, model.GetError(errCode)))
 			return
 		}
-		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
-		err = json.NewEncoder(writer).Encode(result)
-		if err != nil {
-			_log.Logger.Error("unable to encode response", attributes.ErrorKey, err)
-		}
-		return
+		c.JSON(http.StatusOK, result)
 	})
 
-	router.DELETE(resource+"/:id", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		id := params.ByName("id")
-		err, errCode := control.DeleteInstances(request.Header.Get(authHeader), []string{id})
+	router.DELETE(resource+"/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		err, errCode := control.DeleteInstances(c.GetHeader(authHeader), []string{id})
 		if err != nil {
-			http.Error(writer, err.Error(), errCode)
+			_ = c.Error(errors.Join(err, model.GetError(errCode)))
 			return
 		}
-		writer.WriteHeader(errCode)
-		return
+		c.Status(errCode)
 	})
 
-	router.DELETE(resource, func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+	router.DELETE(resource, func(c *gin.Context) {
 		var ids []string
-		err := json.NewDecoder(request.Body).Decode(&ids)
+		err := c.ShouldBind(&ids)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			_ = c.Error(errors.Join(err, model.GetError(http.StatusBadRequest)))
 			return
 		}
-		err, errCode := control.DeleteInstances(request.Header.Get(authHeader), ids)
+		err, errCode := control.DeleteInstances(c.GetHeader(authHeader), ids)
 		if err != nil {
-			http.Error(writer, err.Error(), errCode)
+			_ = c.Error(errors.Join(err, model.GetError(errCode)))
 			return
 		}
-		writer.WriteHeader(errCode)
-		return
+		c.Status(errCode)
 	})
 
-	router.PUT(resource+"/:id", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		id := params.ByName("id")
+	router.PUT(resource+"/:id", func(c *gin.Context) {
+		id := c.Param("id")
 		instance := model.Instance{}
-		err := json.NewDecoder(request.Body).Decode(&instance)
+		err := c.ShouldBind(&instance)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			_ = c.Error(errors.Join(err, model.GetError(http.StatusBadRequest)))
 			return
 		}
 
 		if id != instance.Id {
-			http.Error(writer, "IDs don't match", http.StatusBadRequest)
+			_ = c.Error(errors.Join(errors.New("IDs don't match"), model.GetError(http.StatusBadRequest)))
 			return
 		}
-		err, code := control.SetInstance(instance, getUserId(request), request.Header.Get(authHeader))
+		err, code := control.SetInstance(instance, getUserId(c), c.GetHeader(authHeader))
 		if err != nil {
-			http.Error(writer, err.Error(), code)
+			_ = c.Error(errors.Join(err, model.GetError(code)))
 			return
 		}
-		writer.WriteHeader(http.StatusOK)
-		return
+		c.Status(http.StatusOK)
 	})
 
 }
 
-func getUserId(request *http.Request) string {
-	user := request.Header.Get("X-UserId")
+func getUserId(c *gin.Context) string {
+	user := c.GetHeader("X-UserId")
 	if len(user) == 0 {
 		_log.Logger.Warn("could not extract user id, replacing with developer")
 		user = "developer"
