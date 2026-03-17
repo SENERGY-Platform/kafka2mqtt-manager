@@ -20,12 +20,14 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
-	"github.com/hashicorp/go-uuid"
-	"github.com/parnurzeal/gorequest"
-	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
+	"github.com/hashicorp/go-uuid"
+	"github.com/parnurzeal/gorequest"
 )
 
 type Rancher struct {
@@ -77,13 +79,13 @@ func (r Rancher) createContainer(name string, image string, env map[string]strin
 	code = resp.StatusCode
 	if resp.StatusCode != http.StatusCreated {
 		err = errors.New("could not create instance")
-		log.Println("ERROR: Rancher response code", resp.StatusCode, "when creating container, Body:", body)
+		_log.Logger.Error("rancher response while creating container", "status_code", resp.StatusCode, "response_body", body)
 		return
 	}
 	if len(e) > 0 {
 		err = errors.New("could not create instance")
 		for i := range e {
-			log.Println("ERROR: Rancher create error", e[i].Error())
+			_log.Logger.Error("rancher create error", attributes.ErrorKey, e[i])
 		}
 		return
 	}

@@ -19,9 +19,10 @@ package mongo
 import (
 	"context"
 	"errors"
-	"log"
 	"strings"
 
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -53,39 +54,39 @@ func init() {
 	var err error
 	idKey, err = getBsonFieldName(model.Instance{}, idFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	nameKey, err = getBsonFieldName(model.Instance{}, nameFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	descriptionKey, err = getBsonFieldName(model.Instance{}, descriptionFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	entityNameKey, err = getBsonFieldName(model.Instance{}, entityNameFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	serviceNameKey, err = getBsonFieldName(model.Instance{}, serviceNameFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	ownerKey, err = getBsonFieldName(model.Instance{}, userIdFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	createdAtKey, err = getBsonFieldName(model.Instance{}, createdAtFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	updatedAtKey, err = getBsonFieldName(model.Instance{}, updatedAtFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 	generatedKey, err = getBsonFieldName(model.Instance{}, generatedFieldName)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 
 	CreateCollections = append(CreateCollections, func(db *Mongo) error {
@@ -195,9 +196,16 @@ func (this *Mongo) ListInstances(ctx context.Context, limit int64, offset int64,
 func (this *Mongo) SetInstance(ctx context.Context, instance model.Instance) error {
 	_, err := this.instanceCollection().ReplaceOne(ctx, bson.M{idKey: instance.Id}, instance, options.Replace().SetUpsert(true))
 	if err != nil {
-		log.Println("Cant set instance to db: " + err.Error())
+		_log.Logger.Error("can't set instance in db", attributes.ErrorKey, err)
 	}
 	return err
+}
+
+func logFatal(err error) {
+	if _log.Logger != nil {
+		_log.Logger.Error("mongo init failed", attributes.ErrorKey, err)
+	}
+	panic(err)
 }
 
 func (this *Mongo) RemoveInstances(ctx context.Context, ids []string) error {

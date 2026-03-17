@@ -19,6 +19,7 @@
     "rancher_namespace_id": "",
     "rancher_project_id": "",
     "debug": true,
+    "log_handler": "json",
     "verify_input": true,
     "permissions_v2_url": "http://permv2.permissions:8080",
     "import_deploy_url": "http://import-deploy:8080",

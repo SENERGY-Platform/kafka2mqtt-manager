@@ -18,13 +18,15 @@ package dockerClient
 
 import (
 	"context"
+	"sync"
+
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/util"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	docker "github.com/docker/docker/client"
-	"log"
-	"sync"
 )
 
 type DockerClient struct {
@@ -51,7 +53,7 @@ func (this *DockerClient) CreateContainer(name string, image string, _ string, e
 	if this.config.DockerPull == true {
 		_, err = this.cli.ImagePull(ctx, image, types.ImagePullOptions{})
 		if err != nil {
-			log.Println("Cant pull image: " + err.Error())
+			_log.Logger.Error("can't pull image", attributes.ErrorKey, err)
 			return id, err
 		}
 	}
@@ -73,13 +75,13 @@ func (this *DockerClient) CreateContainer(name string, image string, _ string, e
 		RestartPolicy: restartPolicy,
 	}, nil, nil, name)
 	if err != nil {
-		log.Println("Cant create container: " + err.Error())
+		_log.Logger.Error("can't create container", attributes.ErrorKey, err)
 		return id, err
 	}
 
 	err = this.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
 	if err != nil {
-		log.Println("Cant start container: " + err.Error())
+		_log.Logger.Error("can't start container", attributes.ErrorKey, err)
 		return id, err
 	}
 	return resp.ID, err

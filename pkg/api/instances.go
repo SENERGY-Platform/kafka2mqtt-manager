@@ -19,12 +19,13 @@ package api
 import (
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
 	"github.com/julienschmidt/httprouter"
 )
@@ -140,24 +141,24 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 		err := json.NewDecoder(request.Body).Decode(&instance)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
-			log.Println("ERROR: unable to decode instance request: ", err)
+			_log.Logger.Error("unable to decode instance request", attributes.ErrorKey, err)
 			if config.Debug {
 				b, _ := io.ReadAll(request.Body)
-				log.Println("Payload: " + string(b))
+				_log.Logger.Debug("instance request payload", "payload", string(b))
 			}
 			return
 		}
 		result, err, code := control.CreateInstance(instance, getUserId(request), request.Header.Get(authHeader))
 		if err != nil {
 			http.Error(writer, err.Error(), code)
-			log.Println("ERROR: cant create instance: ", err)
+			_log.Logger.Error("can't create instance", attributes.ErrorKey, err)
 			return
 		}
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		writer.WriteHeader(code)
 		err = json.NewEncoder(writer).Encode(result)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			_log.Logger.Error("unable to encode response", attributes.ErrorKey, err)
 			return
 		}
 		return
@@ -208,7 +209,7 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 		}
 		err = json.NewEncoder(writer).Encode(r)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			_log.Logger.Error("unable to encode response", attributes.ErrorKey, err)
 		}
 		return
 	})
@@ -223,7 +224,7 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(writer).Encode(result)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			_log.Logger.Error("unable to encode response", attributes.ErrorKey, err)
 		}
 		return
 	})
@@ -282,7 +283,7 @@ func DeploymentEndpoints(config config.Config, control Controller, router *httpr
 func getUserId(request *http.Request) string {
 	user := request.Header.Get("X-UserId")
 	if len(user) == 0 {
-		log.Println("WARN: Could not extract UserId, replacing with 'developer'")
+		_log.Logger.Warn("could not extract user id, replacing with developer")
 		user = "developer"
 	}
 	return user

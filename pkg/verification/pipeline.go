@@ -17,11 +17,13 @@
 package verification
 
 import (
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 )
 
 type pipeline struct {
@@ -31,19 +33,19 @@ type pipeline struct {
 func (*Verifier) VerifyPipeline(id string, token string, userId string, config *config.Config) (bool, error) {
 	req, err := http.NewRequest("GET", config.AnalyticsPipelineUrl+"/pipeline/"+id, nil)
 	if err != nil {
-		log.Println("Cant create request to get pipeline: ", err.Error())
+		_log.Logger.Error("can't create request to get pipeline", attributes.ErrorKey, err)
 		return false, err
 	}
 	req.Header.Set("Authorization", token)
 	req.Header.Set("X-UserId", userId)
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Println("Cant get pipeline information: ", err.Error())
+		_log.Logger.Error("can't get pipeline information", attributes.ErrorKey, err)
 		return false, err
 	}
 	if resp.StatusCode != http.StatusOK {
 		payload, _ := io.ReadAll(resp.Body)
-		log.Println("Cant get pipeline information, code: " + strconv.Itoa(resp.StatusCode) + " response: " + string(payload))
+		_log.Logger.Warn("can't get pipeline information", "status_code", strconv.Itoa(resp.StatusCode), "response", string(payload))
 		return false, nil
 	}
 	return true, nil

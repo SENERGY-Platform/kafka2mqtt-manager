@@ -54,7 +54,8 @@ type Config struct {
 	StartupEnsureDeployed     bool   `json:"startup_ensure_deployed"`
 	PermissionsV2Url          string `json:"permissions_v2_url"`
 
-	Debug bool `json:"debug"`
+	Debug      bool   `json:"debug"`
+	LogHandler string `json:"log_handler"`
 }
 
 // loads config from json in location and used environment variables (e.g ZookeeperUrl --> ZOOKEEPER_URL)

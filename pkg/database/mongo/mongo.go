@@ -19,17 +19,19 @@ package mongo
 import (
 	"context"
 	"errors"
-	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
-	"github.com/satori/go.uuid"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/bsoncodec"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"reflect"
 	"runtime/debug"
 	"sync"
 	"time"
+
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
+	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
+	uuid "github.com/satori/go.uuid"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsoncodec"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Mongo struct {
@@ -96,7 +98,7 @@ func (this *Mongo) Transaction(ctx context.Context) (resultCtx context.Context, 
 			err = session.AbortTransaction(resultCtx)
 		}
 		if err != nil {
-			log.Println("ERROR: unable to finish mongo transaction", err)
+			_log.Logger.Error("unable to finish mongo transaction", attributes.ErrorKey, err)
 		}
 		return err
 	}, nil

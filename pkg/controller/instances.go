@@ -21,11 +21,12 @@ import (
 	"fmt"
 	"github.com/SENERGY-Platform/permissions-v2/pkg/client"
 
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/model"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/util"
 	permv2 "github.com/SENERGY-Platform/permissions-v2/pkg/model"
 
-	"log"
 	"net/http"
 	"reflect"
 	"strings"
@@ -85,7 +86,7 @@ func (this *Controller) CreateInstance(instance model.Instance, userId string, t
 
 	env, err, code := this.getEnv(&instance, token, userId, true)
 	if err != nil {
-		log.Println("Cant get env: " + err.Error())
+		_log.Logger.Error("can't get env", attributes.ErrorKey, err)
 		return result, err, code
 	}
 
@@ -222,10 +223,10 @@ func (this *Controller) EnsureAllInstancesDeployed() (err error) {
 				return err
 			}
 			if exists {
-				log.Println(instance.Id + " still exists")
+				_log.Logger.Info("instance still exists", "instance_id", instance.Id)
 				continue
 			}
-			log.Println("Recreating " + instance.Id)
+			_log.Logger.Info("recreating instance", "instance_id", instance.Id)
 			env, err, _ := this.getEnv(&instance, "", instance.UserId, false)
 			if err != nil {
 				return err
@@ -308,7 +309,7 @@ func (this *Controller) getEnv(instance *model.Instance, token string, userId st
 			if !strings.HasSuffix(baseTopic, "/") && len(baseTopic) > 0 {
 				baseTopic += "/"
 				instance.CustomMqttBaseTopic = &baseTopic
-				log.Println("baseTopic", baseTopic, *instance.CustomMqttBaseTopic)
+				_log.Logger.Debug("normalized custom mqtt base topic", "base_topic", baseTopic, "custom_mqtt_base_topic", *instance.CustomMqttBaseTopic)
 			}
 		}
 	} else {
