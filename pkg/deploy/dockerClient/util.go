@@ -18,12 +18,12 @@ package dockerClient
 
 import (
 	"context"
-	"github.com/docker/docker/api/types"
+
 	"github.com/docker/docker/api/types/container"
 )
 
-func (this *DockerClient) listAllContainers() (containers []types.Container, err error) {
-	return this.cli.ContainerList(context.Background(), types.ContainerListOptions{})
+func (this *DockerClient) listAllContainers() (containers []container.Summary, err error) {
+	return this.cli.ContainerList(context.Background(), container.ListOptions{})
 }
 
 func (this *DockerClient) stopAllContainers() (err error) {
@@ -49,7 +49,7 @@ func (this *DockerClient) removeAllContainers() (err error) {
 		return err
 	}
 
-	removeOptions := types.ContainerRemoveOptions{Force: true}
+	removeOptions := container.RemoveOptions{Force: true}
 
 	for _, ct := range containers {
 		if err = this.cli.ContainerRemove(ctx, ct.ID, removeOptions); err != nil {
@@ -67,7 +67,7 @@ func (this *DockerClient) stopContainer(id string) (err error) {
 
 func (this *DockerClient) removeContainer(id string) (err error) {
 	ctx := context.Background()
-	removeOptions := types.ContainerRemoveOptions{Force: true}
+	removeOptions := container.RemoveOptions{Force: true}
 
 	return this.cli.ContainerRemove(ctx, id, removeOptions)
 

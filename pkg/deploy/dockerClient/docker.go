@@ -24,8 +24,8 @@ import (
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/config"
 	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/util"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	docker_image "github.com/docker/docker/api/types/image"
 	docker "github.com/docker/docker/client"
 )
 
@@ -51,7 +51,7 @@ func New(config config.Config, ctx context.Context, wg *sync.WaitGroup) (client 
 func (this *DockerClient) CreateContainer(name string, image string, _ string, env map[string]string, restart bool) (id string, err error) {
 	ctx, _ := util.GetTimeoutContext()
 	if this.config.DockerPull == true {
-		_, err = this.cli.ImagePull(ctx, image, types.ImagePullOptions{})
+		_, err = this.cli.ImagePull(ctx, image, docker_image.PullOptions{})
 		if err != nil {
 			_log.Logger.Error("can't pull image", attributes.ErrorKey, err)
 			return id, err
@@ -79,7 +79,7 @@ func (this *DockerClient) CreateContainer(name string, image string, _ string, e
 		return id, err
 	}
 
-	err = this.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{})
+	err = this.cli.ContainerStart(ctx, resp.ID, container.StartOptions{})
 	if err != nil {
 		_log.Logger.Error("can't start container", attributes.ErrorKey, err)
 		return id, err
