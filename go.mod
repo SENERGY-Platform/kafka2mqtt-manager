@@ -4,8 +4,8 @@ go 1.26.1
 
 require (
 	github.com/SENERGY-Platform/go-service-base/struct-logger v0.8.0
-	github.com/SENERGY-Platform/permissions-v2 v0.0.45
-	github.com/docker/docker v28.5.1+incompatible
+	github.com/SENERGY-Platform/permissions-v2 v0.0.47
+	github.com/docker/docker v28.5.2+incompatible
 	github.com/gin-gonic/gin v1.12.0
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/parnurzeal/gorequest v0.2.16
@@ -53,14 +53,14 @@ require (
 	golang.org/x/arch v0.27.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260526163538-3dc84a4a5aaa // indirect
-	google.golang.org/grpc v1.81.1 // indirect
+	google.golang.org/grpc v1.82.1 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/SENERGY-Platform/developer-notifications v0.0.5 // indirect
+	github.com/SENERGY-Platform/developer-notifications v0.0.6 // indirect
 	github.com/SENERGY-Platform/gin-middleware v0.14.1
 	github.com/SENERGY-Platform/service-commons v0.0.0-20260821114734-3e4578ac2358 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
@@ -80,7 +80,7 @@ require (
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/klauspost/compress v1.18.6 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/montanaflynn/stats v0.9.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
