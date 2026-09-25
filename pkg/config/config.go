@@ -35,8 +35,11 @@ type Config struct {
 	MqttUser                  string `json:"mqtt_user"`
 	MqttPw                    string `json:"mqtt_pw"`
 	MongoUrl                  string `json:"mongo_url"`
+	MongoUser                 string `json:"mongo_user"`
+	MongoPassword             string `json:"mongo_password" config:"secret"`
+	MongoAuthSource           string `json:"mongo_auth_source"`
+	MongoDatabase             string `json:"mongo_database"`
 	MongoReplSet              bool   `json:"mongo_repl_set"`
-	MongoTable                string `json:"mongo_table"`
 	MongoImportTypeCollection string `json:"mongo_import_type_collection"`
 	TransferImage             string `json:"transfer_image"`
 	DeployMode                string `json:"deploy_mode"`
@@ -64,12 +67,47 @@ func Load(location string) (config Config, err error) {
 	if err != nil {
 		return config, err
 	}
+	config = Config{
+		MongoUrl:        "mongodb://localhost:27017",
+		MongoAuthSource: "admin",
+		MongoDatabase:   "kafka2mqtt_manager",
+	}
 	err = json.NewDecoder(file).Decode(&config)
 	if err != nil {
 		return config, err
 	}
 	handleEnvironmentVars(&config)
 	return config, nil
+}
+
+func isSecret(field reflect.StructField) bool {
+	return strings.Contains(field.Tag.Get("config"), "secret")
+}
+
+// plainConfig has none of Config's methods, so formatting it does not recurse.
+type plainConfig Config
+
+// masked returns a copy in which every non-empty field tagged config:"secret" is replaced.
+func (c Config) masked() plainConfig {
+	v := reflect.ValueOf(&c).Elem()
+	for i := 0; i < v.NumField(); i++ {
+		if isSecret(v.Type().Field(i)) && v.Field(i).Kind() == reflect.String && v.Field(i).String() != "" {
+			v.Field(i).SetString("***")
+		}
+	}
+	return plainConfig(c)
+}
+
+func (c Config) MarshalJSON() ([]byte, error) {
+	return json.Marshal(c.masked())
+}
+
+func (c Config) String() string {
+	return fmt.Sprintf("%+v", c.masked())
+}
+
+func (c Config) GoString() string {
+	return fmt.Sprintf("%#v", c.masked())
 }
 
 var camel = regexp.MustCompile("(^[^A-Z]*|[A-Z]*)([A-Z][^A-Z]+|$)")
@@ -95,7 +133,7 @@ func handleEnvironmentVars(config *Config) {
 		envName := fieldNameToEnvName(fieldName)
 		envValue := os.Getenv(envName)
 		if envValue != "" {
-			if LogEnvConfig {
+			if LogEnvConfig && !isSecret(configType.Field(index)) {
 				fmt.Println("use environment variable: ", envName, " = ", envValue)
 			}
 			if configValue.FieldByName(fieldName).Kind() == reflect.Int64 {

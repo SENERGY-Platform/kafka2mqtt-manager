@@ -90,7 +90,7 @@ func init() {
 	}
 
 	CreateCollections = append(CreateCollections, func(db *Mongo) error {
-		collection := db.client.Database(db.config.MongoTable).Collection(db.config.MongoImportTypeCollection)
+		collection := db.client.Database(db.config.MongoDatabase).Collection(db.config.MongoImportTypeCollection)
 		err = db.ensureCompoundIndex(collection, "instanceOwnerIdindex", true, true, ownerKey, idKey)
 		if err != nil {
 			return err
@@ -100,7 +100,7 @@ func init() {
 }
 
 func (this *Mongo) instanceCollection() *mongo.Collection {
-	return this.client.Database(this.config.MongoTable).Collection(this.config.MongoImportTypeCollection)
+	return this.client.Database(this.config.MongoDatabase).Collection(this.config.MongoImportTypeCollection)
 }
 
 func (this *Mongo) GetInstance(ctx context.Context, id string) (instance model.Instance, exists bool, err error) {
