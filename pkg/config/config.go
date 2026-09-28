@@ -33,7 +33,7 @@ type Config struct {
 	KafkaBootstrap            string `json:"kafka_bootstrap"`
 	MqttBroker                string `json:"mqtt_broker"`
 	MqttUser                  string `json:"mqtt_user"`
-	MqttPw                    string `json:"mqtt_pw"`
+	MqttPw                    string `json:"mqtt_pw" config:"secret"`
 	MongoUrl                  string `json:"mongo_url"`
 	MongoUser                 string `json:"mongo_user"`
 	MongoPassword             string `json:"mongo_password" config:"secret"`
@@ -47,7 +47,7 @@ type Config struct {
 	DockerPull                bool   `json:"docker_pull"`
 	RancherUrl                string `json:"rancher_url"`
 	RancherAccessKey          string `json:"rancher_access_key"`
-	RancherSecretKey          string `json:"rancher_secret_key"`
+	RancherSecretKey          string `json:"rancher_secret_key" config:"secret"`
 	RancherStackId            string `json:"rancher_stack_id"`
 	RancherNamespaceId        string `json:"rancher_namespace_id"`
 	RancherProjectId          string `json:"rancher_project_id"`

@@ -177,6 +177,45 @@ func TestConfigFormattingMasksMongoPassword(t *testing.T) {
 	}
 }
 
+func TestConfigFormattingMasksMqttPwAndRancherSecretKey(t *testing.T) {
+	t.Setenv("MQTT_PW", "s3cr3t-mqtt")
+	t.Setenv("RANCHER_SECRET_KEY", "s3cr3t-rancher")
+	var cfg Config
+	captureStdout(t, func() {
+		var err error
+		if cfg, err = Load("../../config.json"); err != nil {
+			t.Error(err)
+		}
+	})
+	b, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputs := map[string]string{
+		"json": string(b),
+		"%v":   fmt.Sprintf("%v", cfg),
+		"%+v":  fmt.Sprintf("%+v", cfg),
+		"%#v":  fmt.Sprintf("%#v", cfg),
+	}
+	for name, s := range outputs {
+		if strings.Contains(s, "s3cr3t-mqtt") {
+			t.Errorf("%s leaks the mqtt password: %s", name, s)
+		}
+		if strings.Contains(s, "s3cr3t-rancher") {
+			t.Errorf("%s leaks the rancher secret key: %s", name, s)
+		}
+	}
+	if !strings.Contains(string(b), `"mqtt_pw":"***"`) {
+		t.Errorf("json does not show the mqtt password as masked: %s", b)
+	}
+	if !strings.Contains(string(b), `"rancher_secret_key":"***"`) {
+		t.Errorf("json does not show the rancher secret key as masked: %s", b)
+	}
+	if cfg.MqttPw != "s3cr3t-mqtt" || cfg.RancherSecretKey != "s3cr3t-rancher" {
+		t.Errorf("masking changed the loaded values: mqtt=%q rancher=%q", cfg.MqttPw, cfg.RancherSecretKey)
+	}
+}
+
 func captureStdout(t *testing.T, f func()) string {
 	t.Helper()
 	r, w, err := os.Pipe()
