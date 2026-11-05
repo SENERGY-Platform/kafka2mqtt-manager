@@ -51,6 +51,7 @@ type Config struct {
 	RancherStackId            string `json:"rancher_stack_id"`
 	RancherNamespaceId        string `json:"rancher_namespace_id"`
 	RancherProjectId          string `json:"rancher_project_id"`
+	KubernetesNamespace       string `json:"kubernetes_namespace"`
 	VerifyInput               bool   `json:"verify_input"`
 	ImportDeployUrl           string `json:"import_deploy_url"`
 	AnalyticsPipelineUrl      string `json:"analytics_pipeline_url"`

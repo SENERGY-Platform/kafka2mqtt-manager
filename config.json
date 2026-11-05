@@ -21,6 +21,7 @@
     "rancher_stack_id": "",
     "rancher_namespace_id": "",
     "rancher_project_id": "",
+    "kubernetes_namespace": "kafka2mqtt-instances",
     "debug": true,
     "log_handler": "json",
     "verify_input": true,

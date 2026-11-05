@@ -28,6 +28,7 @@ import (
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/database/mongo"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy"
 	"github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy/dockerClient"
+	kubernetesapi "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy/kubernetes-api"
 	rancher1api "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy/rancher-api"
 	rancher2api "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/deploy/rancher2-api"
 	_log "github.com/SENERGY-Platform/kafka2mqtt-manager/pkg/log"
@@ -54,6 +55,9 @@ func Start(conf config.Config, ctx context.Context) (wg *sync.WaitGroup, err err
 		break
 	case "rancher2":
 		deploymentClient = rancher2api.New(conf)
+		break
+	case "kubernetes":
+		deploymentClient, err = kubernetesapi.New(conf)
 		break
 	default:
 		return wg, errors.New("unknown deploy_mode")
